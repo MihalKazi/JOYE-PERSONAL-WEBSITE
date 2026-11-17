@@ -57,3 +57,5 @@ node_modules/
 
 # local backups made before content imports
 /backups
+
+.vercel

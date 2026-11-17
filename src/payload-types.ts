@@ -213,6 +213,8 @@ export interface Media {
    * A few words about what is in the picture. Helps blind visitors and search engines.
    */
   alt?: string | null;
+  prefix?: string | null;
+  _objectKey?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -695,6 +697,8 @@ export interface TrainingsSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  prefix?: T;
+  _objectKey?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

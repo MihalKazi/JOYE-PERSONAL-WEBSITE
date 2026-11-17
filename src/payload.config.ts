@@ -1,5 +1,6 @@
 import { sqliteAdapter } from '@payloadcms/db-sqlite'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
@@ -41,8 +42,21 @@ export default buildConfig({
   db: sqliteAdapter({
     client: {
       url: process.env.DATABASE_URL || '',
+      // Turso (hosted SQLite) in production; unset for the local file database.
+      authToken: process.env.DATABASE_AUTH_TOKEN,
     },
   }),
   sharp,
-  plugins: [],
+  plugins: [
+    // Media files live in Vercel Blob when BLOB_READ_WRITE_TOKEN is set (production);
+    // without it, uploads fall back to the local /media folder.
+    vercelBlobStorage({
+      collections: { media: true },
+      token: process.env.BLOB_READ_WRITE_TOKEN,
+      // Keep the same schema with and without the token, so the local DB can be copied to production.
+      alwaysInsertFields: true,
+      // Upload straight from the browser to Blob, past Vercel's 4.5 MB request limit (videos, scans).
+      clientUploads: true,
+    }),
+  ],
 })
