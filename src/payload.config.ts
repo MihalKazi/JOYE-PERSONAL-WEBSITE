@@ -21,6 +21,7 @@ import { SiteSettings } from './globals/SiteSettings'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+const dbUrl = process.env.DATABASE_URL || process.env.TURSO_DATABASE_URL || ''
 
 export default buildConfig({
   admin: {
@@ -41,9 +42,10 @@ export default buildConfig({
   },
   db: sqliteAdapter({
     client: {
-      url: process.env.DATABASE_URL || '',
-      // Turso (hosted SQLite) in production; unset for the local file database.
-      authToken: process.env.DATABASE_AUTH_TOKEN,
+      // Local dev: DATABASE_URL=file:./joye.db. Production (Vercel): only the Turso
+      // variables from the Vercel Turso integration are set, so those are used.
+      url: dbUrl,
+      authToken: dbUrl.startsWith('file:') ? undefined : process.env.TURSO_AUTH_TOKEN,
     },
   }),
   sharp,
