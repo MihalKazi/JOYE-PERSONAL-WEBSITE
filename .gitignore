@@ -48,3 +48,12 @@ node_modules/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# local sqlite db
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# local backups made before content imports
+/backups

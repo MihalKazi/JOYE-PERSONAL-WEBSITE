@@ -67,8 +67,16 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    users: User;
+    research: Research;
+    publications: Publication;
+    projects: Project;
+    posts: Post;
+    news: News;
+    talks: Talk;
+    works: Work;
+    trainings: Training;
     media: Media;
+    users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -76,19 +84,33 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
-    users: UsersSelect<false> | UsersSelect<true>;
+    research: ResearchSelect<false> | ResearchSelect<true>;
+    publications: PublicationsSelect<false> | PublicationsSelect<true>;
+    projects: ProjectsSelect<false> | ProjectsSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
+    news: NewsSelect<false> | NewsSelect<true>;
+    talks: TalksSelect<false> | TalksSelect<true>;
+    works: WorksSelect<false> | WorksSelect<true>;
+    trainings: TrainingsSelect<false> | TrainingsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'site-settings': SiteSetting;
+    'about-page': AboutPage;
+  };
+  globalsSelect: {
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+    'about-page': AboutPageSelect<false> | AboutPageSelect<true>;
+  };
   locale: null;
   widgets: {
     collections: CollectionsWidget;
@@ -118,11 +140,300 @@ export interface UserAuthOperations {
   };
 }
 /**
+ * Thesis, undergraduate research, research assistantships and future interests. Drag rows to change their order.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "research".
+ */
+export interface Research {
+  id: number;
+  _order?: string | null;
+  title: string;
+  /**
+   * e.g. Master's thesis, Research assistant
+   */
+  kind?: string | null;
+  /**
+   * e.g. University of Dhaka
+   */
+  institution?: string | null;
+  /**
+   * Leave an empty line between paragraphs.
+   */
+  summary?: string | null;
+  link?: string | null;
+  status: 'current' | 'completed' | 'future';
+  /**
+   * e.g. 2024 – present
+   */
+  period?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Journal articles, conference papers, reports and theses.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publications".
+ */
+export interface Publication {
+  id: number;
+  title: string;
+  /**
+   * As they appear in the citation, e.g. Joye, I. N., & Rahman, A.
+   */
+  authors?: string | null;
+  /**
+   * Journal, conference or publisher.
+   */
+  venue?: string | null;
+  /**
+   * Paste the full reference if you want it shown as written.
+   */
+  citation?: string | null;
+  /**
+   * DOI or web address.
+   */
+  link?: string | null;
+  file?: (number | null) | Media;
+  kind: 'journal' | 'conference' | 'report' | 'thesis' | 'other';
+  year: number;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Every photo and file used on the site. You can also upload straight from any page.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: number;
+  /**
+   * A few words about what is in the picture. Helps blind visitors and search engines.
+   */
+  alt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumb?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    large?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    hero?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * Community archiving, digital rights, technology and advocacy work. Drag rows to change their order.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects".
+ */
+export interface Project {
+  id: number;
+  _order?: string | null;
+  title: string;
+  /**
+   * e.g. Audio-visual archivist
+   */
+  role?: string | null;
+  /**
+   * e.g. 2024 – present
+   */
+  period?: string | null;
+  /**
+   * Leave an empty line between paragraphs.
+   */
+  summary?: string | null;
+  image?: (number | null) | Media;
+  link?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Write a post, then press "Publish". Use "Save draft" to keep working on it privately.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: number;
+  title: string;
+  /**
+   * One line shown in the list of posts.
+   */
+  excerpt?: string | null;
+  cover?: (number | null) | Media;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  publishedDate: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Media coverage, interviews, mentions, announcements and awards.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "news".
+ */
+export interface News {
+  id: number;
+  /**
+   * Headline.
+   */
+  title: string;
+  /**
+   * e.g. The Daily Star (optional)
+   */
+  source?: string | null;
+  summary?: string | null;
+  link?: string | null;
+  kind: 'media' | 'interview' | 'announcement' | 'award' | 'conference' | 'other';
+  date: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Conferences, panels, workshops and presentations.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "talks".
+ */
+export interface Talk {
+  id: number;
+  /**
+   * Session or talk title.
+   */
+  title: string;
+  /**
+   * e.g. Panellist, Workshop instructor
+   */
+  role?: string | null;
+  /**
+   * e.g. DRAPAC 2026
+   */
+  event?: string | null;
+  location?: string | null;
+  date: string;
+  /**
+   * Event or programme page.
+   */
+  link?: string | null;
+  photos?: (number | Media)[] | null;
+  extraLinks?:
+    | {
+        /**
+         * e.g. Recording, Photos
+         */
+        label: string;
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Performances, drawings and photographs shown on the Creative Practice page. Drag rows to change their order.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "works".
+ */
+export interface Work {
+  id: number;
+  _order?: string | null;
+  title: string;
+  image: number | Media;
+  /**
+   * Optional. Shown when someone opens the work.
+   */
+  description?: string | null;
+  moreImages?: (number | Media)[] | null;
+  /**
+   * An MP4 that plays when someone opens the work. The main image is used as its cover.
+   */
+  video?: (number | null) | Media;
+  /**
+   * YouTube or Vimeo link, e.g. for a performance.
+   */
+  videoUrl?: string | null;
+  category: 'performance' | 'drawings' | 'photography';
+  year?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "trainings".
+ */
+export interface Training {
+  id: number;
+  title: string;
+  organisation?: string | null;
+  year: number;
+  link?: string | null;
+  /**
+   * PDF or image.
+   */
+  certificate?: (number | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * People who can sign in and edit the site.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -145,29 +456,10 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: string;
-  alt: string;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -184,20 +476,52 @@ export interface PayloadKv {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
-        relationTo: 'users';
-        value: string | User;
+        relationTo: 'research';
+        value: number | Research;
+      } | null)
+    | ({
+        relationTo: 'publications';
+        value: number | Publication;
+      } | null)
+    | ({
+        relationTo: 'projects';
+        value: number | Project;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: number | Post;
+      } | null)
+    | ({
+        relationTo: 'news';
+        value: number | News;
+      } | null)
+    | ({
+        relationTo: 'talks';
+        value: number | Talk;
+      } | null)
+    | ({
+        relationTo: 'works';
+        value: number | Work;
+      } | null)
+    | ({
+        relationTo: 'trainings';
+        value: number | Training;
       } | null)
     | ({
         relationTo: 'media';
-        value: string | Media;
+        value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: number | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -207,10 +531,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -230,11 +554,192 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "research_select".
+ */
+export interface ResearchSelect<T extends boolean = true> {
+  _order?: T;
+  title?: T;
+  kind?: T;
+  institution?: T;
+  summary?: T;
+  link?: T;
+  status?: T;
+  period?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "publications_select".
+ */
+export interface PublicationsSelect<T extends boolean = true> {
+  title?: T;
+  authors?: T;
+  venue?: T;
+  citation?: T;
+  link?: T;
+  file?: T;
+  kind?: T;
+  year?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects_select".
+ */
+export interface ProjectsSelect<T extends boolean = true> {
+  _order?: T;
+  title?: T;
+  role?: T;
+  period?: T;
+  summary?: T;
+  image?: T;
+  link?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  excerpt?: T;
+  cover?: T;
+  content?: T;
+  publishedDate?: T;
+  generateSlug?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "news_select".
+ */
+export interface NewsSelect<T extends boolean = true> {
+  title?: T;
+  source?: T;
+  summary?: T;
+  link?: T;
+  kind?: T;
+  date?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "talks_select".
+ */
+export interface TalksSelect<T extends boolean = true> {
+  title?: T;
+  role?: T;
+  event?: T;
+  location?: T;
+  date?: T;
+  link?: T;
+  photos?: T;
+  extraLinks?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "works_select".
+ */
+export interface WorksSelect<T extends boolean = true> {
+  _order?: T;
+  title?: T;
+  image?: T;
+  description?: T;
+  moreImages?: T;
+  video?: T;
+  videoUrl?: T;
+  category?: T;
+  year?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "trainings_select".
+ */
+export interface TrainingsSelect<T extends boolean = true> {
+  title?: T;
+  organisation?: T;
+  year?: T;
+  link?: T;
+  certificate?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_select".
+ */
+export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumb?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        large?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        hero?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -258,24 +763,6 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media_select".
- */
-export interface MediaSelect<T extends boolean = true> {
-  alt?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -316,6 +803,141 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * Your name, email, profile links and CV — used on the Contact page and footer.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings".
+ */
+export interface SiteSetting {
+  id: number;
+  name: string;
+  /**
+   * Short line under your name on the home page.
+   */
+  tagline?: string | null;
+  email?: string | null;
+  location?: string | null;
+  /**
+   * LinkedIn, Google Scholar, ORCID… Shown on the Contact page in this order.
+   */
+  links?:
+    | {
+        /**
+         * e.g. LinkedIn
+         */
+        label: string;
+        /**
+         * Full address, https://…
+         */
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Upload a new PDF here whenever your CV changes.
+   */
+  cv?: (number | null) | Media;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * Your bio and portrait (the first page), and the landscape page behind the Explore button.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "about-page".
+ */
+export interface AboutPage {
+  id: number;
+  /**
+   * Full-screen photo on the landscape page (opened by the round Explore button). Set the focal point so faces stay in view.
+   */
+  heroImage: number | Media;
+  heroSubtitle?: string | null;
+  kicker?: string | null;
+  title?: string | null;
+  /**
+   * Leave an empty line between paragraphs.
+   */
+  bio: string;
+  /**
+   * Shown on the white card.
+   */
+  portrait?: (number | null) | Media;
+  /**
+   * Optional. Uses the landscape photo if empty.
+   */
+  frameImage?: (number | null) | Media;
+  workTitle?: string | null;
+  newsTitle?: string | null;
+  intros?: {
+    research?: string | null;
+    publications?: string | null;
+    projects?: string | null;
+    blog?: string | null;
+    news?: string | null;
+    talks?: string | null;
+    creative?: string | null;
+    cv?: string | null;
+    training?: string | null;
+    contact?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings_select".
+ */
+export interface SiteSettingsSelect<T extends boolean = true> {
+  name?: T;
+  tagline?: T;
+  email?: T;
+  location?: T;
+  links?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        id?: T;
+      };
+  cv?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "about-page_select".
+ */
+export interface AboutPageSelect<T extends boolean = true> {
+  heroImage?: T;
+  heroSubtitle?: T;
+  kicker?: T;
+  title?: T;
+  bio?: T;
+  portrait?: T;
+  frameImage?: T;
+  workTitle?: T;
+  newsTitle?: T;
+  intros?:
+    | T
+    | {
+        research?: T;
+        publications?: T;
+        projects?: T;
+        blog?: T;
+        news?: T;
+        talks?: T;
+        creative?: T;
+        cv?: T;
+        training?: T;
+        contact?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

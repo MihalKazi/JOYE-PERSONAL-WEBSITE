@@ -1,59 +1,72 @@
-import { headers as getHeaders } from 'next/headers.js'
 import Image from 'next/image'
-import { getPayload } from 'payload'
-import React from 'react'
-import { fileURLToPath } from 'url'
+import Link from 'next/link'
 
-import config from '@/payload.config'
-import './styles.css'
+import { ExploreButton } from '@/components/site/ExploreButton'
+import { paragraphs } from '@/components/site/PageHead'
+import { asMedia, focalPosition, mediaUrl } from '@/lib/media'
+import { getClient, getSettings } from '@/lib/payload'
 
-export default async function HomePage() {
-  const headers = await getHeaders()
-  const payloadConfig = await config
-  const payload = await getPayload({ config: payloadConfig })
-  const { user } = await payload.auth({ headers })
+/** Home = About me (mockup 1). The first thing a visitor sees. */
+export default async function AboutPage() {
+  const payload = await getClient()
+  const [about, settings] = await Promise.all([payload.findGlobal({ slug: 'about-page', depth: 1 }), getSettings()])
 
-  const fileURL = `vscode://file/${fileURLToPath(import.meta.url)}`
+  const frameUrl = mediaUrl(about.frameImage ?? about.heroImage, 'large')
+  const portraitUrl = mediaUrl(about.portrait, 'large')
+  const linkedin = settings.links?.find((l) => /linkedin/i.test(l.label))
 
   return (
-    <div className="home">
-      <div className="content">
-        <picture>
-          <source srcSet="https://raw.githubusercontent.com/payloadcms/payload/3.x/packages/ui/src/assets/payload-favicon.svg" />
-          <Image
-            alt="Payload Logo"
-            height={65}
-            src="https://raw.githubusercontent.com/payloadcms/payload/3.x/packages/ui/src/assets/payload-favicon.svg"
-            width={65}
-          />
-        </picture>
-        {!user && <h1>Welcome to your new project.</h1>}
-        {user && <h1>Welcome back, {user.email}</h1>}
-        <div className="links">
-          <a
-            className="admin"
-            href={payloadConfig.routes.admin}
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            Go to admin panel
-          </a>
-          <a
-            className="docs"
-            href="https://payloadcms.com/docs"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            Documentation
-          </a>
+    <main className="about">
+      <div className="about__copy">
+        {about.kicker && (
+          <div className="kicker" data-reveal>
+            {about.kicker}
+          </div>
+        )}
+        <h1 data-split>{about.title}</h1>
+        {paragraphs(about.bio).map((p, i) => (
+          <p key={i} data-split="lines">
+            {p}
+          </p>
+        ))}
+        <ExploreButton
+          href="/explore"
+          label="Explore the work"
+          full={mediaUrl(about.heroImage, 'hero')}
+          position={focalPosition(about.heroImage)}
+        />
+        <div className="about__contact" data-reveal>
+          <h2>
+            <Link href="/contact">Contact</Link>
+          </h2>
+          {settings.email && <a href={`mailto:${settings.email}`}>{settings.email}</a>}
+          {settings.location && <span>{settings.location}</span>}
         </div>
       </div>
-      <div className="footer">
-        <p>Update this page by editing</p>
-        <a className="codeLink" href={fileURL}>
-          <code>app/(frontend)/page.tsx</code>
-        </a>
+      <div className="about__media">
+        <div className="minilinks" data-reveal>
+          <Link href="/cv">CV</Link>
+          <Link href="/news">NEWS</Link>
+          {linkedin && (
+            <a href={linkedin.url} target="_blank" rel="noopener noreferrer">
+              LINKEDIN
+            </a>
+          )}
+        </div>
+        <div className="frame">
+          <div className="frame__back">
+            {frameUrl && (
+              <Image src={frameUrl} alt="" fill priority sizes="(max-width:900px) 100vw, 50vw" style={{ objectPosition: '88% 70%' }} />
+            )}
+          </div>
+          <div className="frame__card">
+            {portraitUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={portraitUrl} alt={asMedia(about.portrait)?.alt || 'Portrait'} />
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+    </main>
   )
 }
