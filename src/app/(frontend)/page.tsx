@@ -1,72 +1,79 @@
-import Image from 'next/image'
 import Link from 'next/link'
 
-import { ExploreButton } from '@/components/site/ExploreButton'
+import { NEWS_KINDS } from '@/collections/News'
+import { Ribbon } from '@/components/Ribbon'
 import { paragraphs } from '@/components/site/PageHead'
-import { asMedia, focalPosition, mediaUrl } from '@/lib/media'
-import { getClient, getSettings } from '@/lib/payload'
+import { fullDate } from '@/lib/format'
+import { getAbout, getClient, getSettings } from '@/lib/payload'
 
-/** Home = About me (mockup 1). The first thing a visitor sees. */
-export default async function AboutPage() {
+/**
+ * Home: her name set large at the bottom left with the ribbon rising above it;
+ * on the right, the opening of her bio and the latest news item.
+ * Navigation is the shared tab row (layout); outside links are in the footer.
+ */
+export default async function HomePage() {
   const payload = await getClient()
-  const [about, settings] = await Promise.all([payload.findGlobal({ slug: 'about-page', depth: 1 }), getSettings()])
-
-  const frameUrl = mediaUrl(about.frameImage ?? about.heroImage, 'large')
-  const portraitUrl = mediaUrl(about.portrait, 'large')
-  const linkedin = settings.links?.find((l) => /linkedin/i.test(l.label))
+  const [settings, about, news] = await Promise.all([
+    getSettings(),
+    getAbout(),
+    payload.find({ collection: 'news', sort: '-date', limit: 1, depth: 0 }),
+  ])
+  // Name set in two staggered lines: first word, then the rest with the last word stepped down under it.
+  const words = settings.name.trim().split(/\s+/)
+  const first = words.length > 1 ? words.shift()! : null
+  const last = words.length > 1 ? words.pop()! : null
+  const middle = words.join(' ')
+  const roles = (settings.tagline ?? '').split(/\s*[,·|]\s*/).filter(Boolean)
+  const intro = paragraphs(about.bio)[0]
+  const latest = news.docs[0]
 
   return (
-    <main className="about">
-      <div className="about__copy">
-        {about.kicker && (
-          <div className="kicker" data-reveal>
-            {about.kicker}
-          </div>
+    <main className="home">
+      <Ribbon />
+      <div className="home__id">
+        {roles.length > 0 && (
+          <ul className="home__roles kicker" aria-label="Roles" data-reveal>
+            {roles.map((r) => (
+              <li key={r}>{r}</li>
+            ))}
+          </ul>
         )}
-        <h1 data-split>{about.title}</h1>
-        {paragraphs(about.bio).map((p, i) => (
-          <p key={i} data-split="lines">
-            {p}
-          </p>
-        ))}
-        <ExploreButton
-          href="/explore"
-          label="Explore the work"
-          full={mediaUrl(about.heroImage, 'hero')}
-          position={focalPosition(about.heroImage)}
-        />
-        <div className="about__contact" data-reveal>
-          <h2>
-            <Link href="/contact">Contact</Link>
-          </h2>
-          {settings.email && <a href={`mailto:${settings.email}`}>{settings.email}</a>}
-          {settings.location && <span>{settings.location}</span>}
-        </div>
-      </div>
-      <div className="about__media">
-        <div className="minilinks" data-reveal>
-          <Link href="/cv">CV</Link>
-          <Link href="/news">NEWS</Link>
-          {linkedin && (
-            <a href={linkedin.url} target="_blank" rel="noopener noreferrer">
-              LINKEDIN
-            </a>
+        <h1 className={`home__name${first ? ' is-staggered' : ''}`}>
+          {first && <span data-split>{first}</span>}{' '}
+          <span data-split>{middle}</span>{' '}
+          {last && (
+            <span className="home__last" data-split>
+              {last}
+            </span>
           )}
-        </div>
-        <div className="frame">
-          <div className="frame__back">
-            {frameUrl && (
-              <Image src={frameUrl} alt="" fill priority sizes="(max-width:900px) 100vw, 50vw" style={{ objectPosition: '88% 70%' }} />
-            )}
-          </div>
-          <div className="frame__card">
-            {portraitUrl && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={portraitUrl} alt={asMedia(about.portrait)?.alt || 'Portrait'} />
-            )}
-          </div>
-        </div>
+        </h1>
       </div>
+
+      {(intro || latest) && (
+        <aside className="home__aside">
+          {intro && (
+            <div className="home__intro">
+              <p className="home__label mono" data-reveal>
+                About
+              </p>
+              <p className="home__excerpt" data-reveal>
+                {intro}
+              </p>
+              <Link className="home__more" href="/about" data-reveal>
+                More about me <span aria-hidden="true">→</span>
+              </Link>
+            </div>
+          )}
+          {latest && (
+            <Link className="home__latest" href="/news" data-reveal>
+              <span className="home__label mono">
+                Latest · {NEWS_KINDS.find((k) => k.value === latest.kind)?.label} · {fullDate(latest.date)}
+              </span>
+              <span className="home__headline">{latest.title}</span>
+            </Link>
+          )}
+        </aside>
+      )}
     </main>
   )
 }

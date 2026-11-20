@@ -143,7 +143,7 @@ html { scrollbar-color: #b9b2ab var(--paper); accent-color: var(--red); caret-co
 .tab {
   position: relative; isolation: isolate; flex: none; color: var(--red);
   font-weight: 700; font-size: 12.5px; letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap;
-  padding: 13px clamp(12px, 1.25vw, 24px); transition: color 0.2s;
+  padding: 13px clamp(10px, 1.02vw, 24px); transition: color 0.2s;
 }
 .tab::before {
   content: ""; position: absolute; inset: 0; z-index: -1; background: var(--paper);
@@ -189,27 +189,79 @@ html { scrollbar-color: #b9b2ab var(--paper); accent-color: var(--red); caret-co
 
 /* About (mockup 1) */
 .about {
-  display: grid; grid-template-columns: 1fr 1.05fr; gap: clamp(32px, 6vw, 110px); align-items: center;
-  min-height: 100svh;
+  /* Heading spans the page; long bio runs wide beside the portrait. */
+  display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 0 clamp(32px, 4.5vw, 80px); align-items: start;
   padding: clamp(120px, 17vh, 180px) var(--gutter) clamp(64px, 10vh, 120px);
   max-width: 1440px; margin: 0 auto;
 }
-.about__copy h1 { font-weight: 400; font-size: clamp(48px, 6.6vw, 96px); line-height: 1; letter-spacing: -0.015em; margin: clamp(28px, 6vh, 72px) 0 32px; }
-.about__copy p { font-size: clamp(17px, 1.35vw, 20px); max-width: 46ch; margin: 0 0 1em; color: #2a2b2c; text-wrap: pretty; }
+.about__head { grid-column: 1 / -1; }
+.about__head h1 { font-weight: 400; font-size: clamp(48px, 6.6vw, 96px); line-height: 1; letter-spacing: -0.015em; margin: clamp(20px, 4vh, 48px) 0 clamp(28px, 5vh, 56px); }
+.about__copy p { font-size: clamp(16px, 1.1vw, 17.5px); line-height: 1.7; margin: 0 0 1.1em; color: #2a2b2c; text-align: justify; }
+/* Line-split paragraphs: each line is its own block, so justify every line but the last. */
+.about__copy p > :not(:last-child) { text-align-last: justify; }
 .about__contact { margin-top: clamp(36px, 7vh, 80px); }
 .about__contact h2 { font-weight: 400; font-size: 22px; margin: 0 0 6px; }
 .about__contact h2 a:hover { color: var(--red); }
 .about__contact a, .about__contact span { display: block; font-size: 13px; letter-spacing: 0.02em; color: var(--ink-soft); overflow-wrap: anywhere; }
 .about__contact a:hover { color: var(--red); }
-.minilinks { display: flex; justify-content: space-around; margin: 0 0 6px; }
-.minilinks a { font-weight: 700; font-size: 14px; letter-spacing: 0.14em; padding: 6px 4px; position: relative; }
-.minilinks a::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--red); transform: scaleX(0); transform-origin: right; transition: transform 0.5s var(--ease); }
-.minilinks a:hover::after { transform: scaleX(1); transform-origin: left; }
 .frame { position: relative; aspect-ratio: 497 / 558; }
 .frame__back { position: absolute; inset: 0; overflow: hidden; }
 .frame__back img { object-fit: cover; transform: scale(1.15); }
 .frame__card { position: absolute; left: 0; top: 12%; width: 73%; height: 76%; background: #fff; display: grid; place-items: center; overflow: hidden; }
 .frame__card img { width: 92%; height: auto; mix-blend-mode: multiply; }
+
+/* Home: a big diagonal J (ribbon) from top left to bottom right; bio sits above it on the right,
+   name below it on the left. Nav = shared tab row. */
+.home {
+  position: relative; isolation: isolate; overflow: hidden;
+  display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); grid-template-rows: auto 1fr auto;
+  column-gap: clamp(16px, 2vw, 32px);
+  min-height: 100svh;
+  padding: clamp(110px, 15vh, 150px) var(--gutter) clamp(44px, 8vh, 88px);
+}
+.ribbon { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+.home__id { grid-column: 1 / 9; grid-row: 3; align-self: end; }
+.home__roles { list-style: none; margin: 0 0 clamp(18px, 3vh, 28px); padding: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 0; }
+.home__roles li { white-space: nowrap; }
+.home__roles li + li::before { content: ""; display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: var(--sepia); margin: 0 14px; vertical-align: middle; translate: 0 -1px; }
+.home__name { font-weight: 400; font-size: clamp(52px, 8.4vw, 136px); line-height: 0.92; letter-spacing: -0.025em; margin: 0; }
+.home__name > span { display: block; }
+/* First word, then the rest beside it; the last word steps down under the second. */
+.home__name.is-staggered { display: grid; grid-template-columns: max-content max-content; column-gap: 0.24em; }
+.home__last { grid-column: 2; }
+/* Right column: bio opening + latest news. */
+.home__aside { grid-column: 10 / 13; grid-row: 1; align-self: start; display: grid; gap: clamp(28px, 5vh, 44px); }
+.home__intro { border-top: 1px solid #d9d9d9; padding-top: 14px; }
+.home__intro .home__label { margin: 0 0 12px; }
+/* Opening of the bio, kept to five lines so it never rises into the ribbons; "More about me" continues it. */
+.home__excerpt {
+  font-size: clamp(15.5px, 1.1vw, 17px); line-height: 1.65; color: var(--ink-soft); margin: 0 0 16px;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 5; line-clamp: 5; overflow: hidden;
+}
+.home__more { font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--red); }
+.home__more span { display: inline-block; transition: translate 0.5s var(--ease); }
+.home__more:hover span { translate: 6px 0; }
+.home__latest { display: grid; gap: 6px; padding-top: 14px; border-top: 1px solid #d9d9d9; }
+.home__label { font-size: 12px; letter-spacing: 0.04em; color: var(--ink-quiet); }
+.home__headline { font-size: 17px; line-height: 1.4; transition: color 0.3s; }
+.home__latest:hover .home__headline { color: var(--red); }
+@media (max-width: 1000px) {
+  /* First row is the ribbon's band, a fixed share of the width (Ribbon MOBILE geometry is sized to
+     fill it); the page is as tall as its content, so no empty stretch opens up on tall phones. */
+  .home {
+    grid-template-columns: minmax(0, 1fr); grid-template-rows: 64vw auto auto; row-gap: 40px;
+    min-height: 0; padding-top: clamp(100px, 14vh, 130px);
+  }
+  .home__id, .home__aside { grid-column: 1 / -1; }
+  .home__id { grid-row: 2; }
+  .home__aside { grid-row: 3; }
+  .home__aside { max-width: 52ch; }
+  .home__excerpt { -webkit-line-clamp: 6; line-clamp: 6; }
+}
+@media (max-width: 700px) {
+  .home__roles { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .home__roles li + li::before { content: none; }
+}
 
 /* Explore: ink bar that is a window onto the landscape page.
    Hover: photo wipes in behind the label, letters roll, arrow loops. Click: letters leave, window widens. */
@@ -363,7 +415,8 @@ html { scrollbar-color: #b9b2ab var(--paper); accent-color: var(--red); caret-co
 
 /* ================= Responsive ================= */
 @media (max-width: 900px) {
-  .about { grid-template-columns: 1fr; }
+  .about { grid-template-columns: minmax(0, 1fr); }
+  .about__copy p, .about__copy p > * { text-align: left; text-align-last: auto; }
   .about__copy h2 { margin-top: 24px; }
   .grid { grid-template-columns: repeat(2, 1fr); }
   .about { min-height: 0; }
@@ -382,10 +435,14 @@ html { scrollbar-color: #b9b2ab var(--paper); accent-color: var(--red); caret-co
   .row__tag { display: inline; margin-left: 10px; }
   .cv-embed { display: none; }
   /* row scrolls sideways: fade the trailing edge so it reads as more */
-  .tabs { right: 0; max-width: none; padding-right: 48px;
-    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 56px), transparent);
-    mask-image: linear-gradient(90deg, #000 calc(100% - 56px), transparent); }
+  .tabs { right: 0; max-width: none; padding-right: 28px;
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+    mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); }
   .wordmark p { font-size: 12px; }
+}
+/* Small phones: the four main tabs fit on one line without scrolling. */
+@media (max-width: 420px) {
+  .tab { font-size: 10.5px; letter-spacing: 0.08em; padding: 11px 9px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: 0.01ms !important; animation: none !important; }
