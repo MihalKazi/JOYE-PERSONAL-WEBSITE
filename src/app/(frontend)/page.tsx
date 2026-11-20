@@ -44,8 +44,10 @@ export default async function HomePage() {
     }),
   ])
 
-  // First paragraph sits under the greeting; the rest is the Bio section.
-  const [intro, ...bio] = paragraphs(about.bio)
+  // Home page fields, top to bottom: greeting, line under it, text under that, then the Bio section.
+  const intro = about.intro?.trim()
+  const bio = paragraphs(about.bio)
+  const roles = about.roles || settings.tagline
   const portraitUrl = mediaUrl(about.portrait, 'large')
 
   return (
@@ -63,9 +65,9 @@ export default async function HomePage() {
         )}
         <div className="intro__copy">
           <h1 data-split>{greeting(about.title)}</h1>
-          {settings.tagline && (
+          {roles && (
             <p className="intro__roles" data-reveal>
-              {settings.tagline}
+              {roles}
             </p>
           )}
           {intro && (

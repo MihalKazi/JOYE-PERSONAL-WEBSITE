@@ -17,10 +17,11 @@ export const SiteSettings: GlobalConfig = {
     { name: 'name', type: 'text', required: true, defaultValue: 'Iffat Nowshin Joye' },
     {
       name: 'tagline',
+      // Superseded by Home page → “Line under the greeting”; kept (hidden) so no data is lost.
       type: 'text',
       defaultValue: 'archivist + researcher + dancer',
       label: 'Roles',
-      admin: { description: 'Line under the greeting on the home page, e.g. Information Science Student, Performing Artist…' },
+      admin: { hidden: true },
     },
     {
       type: 'row',

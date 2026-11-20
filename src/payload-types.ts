@@ -817,9 +817,6 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 export interface SiteSetting {
   id: number;
   name: string;
-  /**
-   * Line under the greeting on the home page, e.g. Information Science Student, Performing Artist…
-   */
   tagline?: string | null;
   email?: string | null;
   location?: string | null;
@@ -860,9 +857,20 @@ export interface AboutPage {
   heroImage: number | Media;
   heroSubtitle?: string | null;
   kicker?: string | null;
+  /**
+   * The big heading, e.g. “Hello, I’m Joye!”. Its last word is set in italic.
+   */
   title?: string | null;
   /**
-   * Leave an empty line between paragraphs. The first paragraph sits under the greeting; the rest appear in the Bio section below it.
+   * e.g. “Information Science Student, Performing Artist, Digital Rights Activist.”
+   */
+  roles?: string | null;
+  /**
+   * The short paragraph beside your portrait, above the Explore button.
+   */
+  intro?: string | null;
+  /**
+   * The Bio section further down the page. Leave an empty line between paragraphs.
    */
   bio: string;
   /**
@@ -917,6 +925,8 @@ export interface AboutPageSelect<T extends boolean = true> {
   heroSubtitle?: T;
   kicker?: T;
   title?: T;
+  roles?: T;
+  intro?: T;
   bio?: T;
   portrait?: T;
   frameImage?: T;

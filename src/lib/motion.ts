@@ -62,6 +62,8 @@ export function choreograph(opts: { heroIntro: boolean; viaVeil: boolean }) {
           ease: EASE,
           stagger: lines ? 0.07 : 0.06,
           delay,
+          // Give the text back once it has arrived, so it rewraps (and justifies) at any width.
+          onComplete: () => split.revert(),
         }),
       )
       return

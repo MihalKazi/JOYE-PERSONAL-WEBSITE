@@ -41,15 +41,28 @@ export const AboutPage: GlobalConfig = {
           fields: [
             // Unused since the home page shows your name as the small red label; kept so no data is lost.
             { name: 'kicker', type: 'text', defaultValue: 'Creative work', label: 'Small red label', admin: { hidden: true } },
-            { name: 'title', type: 'text', defaultValue: 'About me', label: 'Greeting' },
+            // In the order they appear on the home page.
+            { name: 'title', type: 'text', defaultValue: 'About me', label: 'Greeting', admin: { description: 'The big heading, e.g. “Hello, I’m Joye!”. Its last word is set in italic.' } },
+            {
+              name: 'roles',
+              type: 'text',
+              label: 'Line under the greeting',
+              admin: { description: 'e.g. “Information Science Student, Performing Artist, Digital Rights Activist.”' },
+            },
+            {
+              name: 'intro',
+              type: 'textarea',
+              label: 'Text under the line',
+              admin: { rows: 5, description: 'The short paragraph beside your portrait, above the Explore button.' },
+            },
             {
               name: 'bio',
               type: 'textarea',
               required: true,
+              label: 'Bio',
               admin: {
                 rows: 12,
-                description:
-                  'Leave an empty line between paragraphs. The first paragraph sits under the greeting; the rest appear in the Bio section below it.',
+                description: 'The Bio section further down the page. Leave an empty line between paragraphs.',
               },
             },
             {

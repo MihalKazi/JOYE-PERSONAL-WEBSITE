@@ -249,9 +249,10 @@ html { scrollbar-color: #b9b2ab var(--paper); accent-color: var(--red); caret-co
 .sec__intro { font-size: 15px; line-height: 1.55; color: var(--ink-soft); margin: 14px 0 0; max-width: 28ch; }
 /* rule spans the column like the rows below; the text keeps a reading measure */
 .bio { border-top: 1px solid var(--line); padding-top: 26px; }
-.bio p { max-width: 74ch; font-size: clamp(16px, 1.15vw, 18px); line-height: 1.75; color: var(--text); margin: 0 0 1.15em; text-align: justify; hyphens: auto; }
+.bio p { max-width: 74ch; font-size: clamp(16px, 1.15vw, 18px); line-height: 1.75; color: var(--text); margin: 0 0 1.15em; text-align: justify; text-align-last: left; hyphens: auto; -webkit-hyphens: auto; overflow-wrap: break-word; }
 .bio p:last-child { margin-bottom: 0; }
-/* Line-split paragraphs: each line is its own block, so justify every line but the last. */
+/* While the lines animate in, each is its own block: justify every line but the last (the split is
+   undone afterwards and the paragraph justifies itself). */
 .bio p > :not(:last-child) { text-align-last: justify; }
 
 @media (max-width: 900px) {

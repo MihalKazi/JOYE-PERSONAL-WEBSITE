@@ -5,7 +5,7 @@ import React from 'react'
 import { SiteShell } from '@/components/site/SiteShell'
 import { Tabs } from '@/components/site/Tabs'
 import { WaveFooter } from '@/components/WaveFooter'
-import { getSettings } from '@/lib/payload'
+import { getAbout, getSettings } from '@/lib/payload'
 import './styles.css'
 
 // Both families are drawn for Bangla and Latin together, so Bangla titles sit in the same voice as the English.
@@ -24,10 +24,10 @@ const mono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400', '500'], variabl
 export const viewport: Viewport = { themeColor: '#f6f1e9' }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const s = await getSettings()
+  const [s, about] = await Promise.all([getSettings(), getAbout()])
   return {
     title: { default: s.name, template: `%s · ${s.name}` },
-    description: `${s.name} — ${s.tagline ?? ''}`.trim(),
+    description: `${s.name} — ${about.roles || s.tagline || ''}`.trim(),
   }
 }
 
