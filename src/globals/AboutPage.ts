@@ -4,10 +4,10 @@ import { revalidateGlobal } from '../hooks/revalidate'
 
 export const AboutPage: GlobalConfig = {
   slug: 'about-page',
-  label: 'About page',
+  label: 'Home page',
   admin: {
     group: 'Pages',
-    description: 'Your bio and portrait (the first page), and the landscape page behind the Explore button.',
+    description: 'Your greeting, bio and portrait (the first page), and the landscape page behind the Explore button.',
   },
   access: {
     read: () => true,
@@ -37,28 +37,34 @@ export const AboutPage: GlobalConfig = {
           ],
         },
         {
-          label: 'About me',
+          label: 'Home',
           fields: [
-            { name: 'kicker', type: 'text', defaultValue: 'Creative work', label: 'Small red label' },
-            { name: 'title', type: 'text', defaultValue: 'About me' },
+            // Unused since the home page shows your name as the small red label; kept so no data is lost.
+            { name: 'kicker', type: 'text', defaultValue: 'Creative work', label: 'Small red label', admin: { hidden: true } },
+            { name: 'title', type: 'text', defaultValue: 'About me', label: 'Greeting' },
             {
               name: 'bio',
               type: 'textarea',
               required: true,
-              admin: { rows: 8, description: 'Leave an empty line between paragraphs.' },
+              admin: {
+                rows: 12,
+                description:
+                  'Leave an empty line between paragraphs. The first paragraph sits under the greeting; the rest appear in the Bio section below it.',
+              },
             },
             {
               name: 'portrait',
               type: 'upload',
               relationTo: 'media',
-              admin: { description: 'Shown on the white card.' },
+              admin: { description: 'Your drawn portrait, shown on the home page beside the greeting.' },
             },
             {
               name: 'frameImage',
               type: 'upload',
               relationTo: 'media',
               label: 'Photo behind the card',
-              admin: { description: 'Optional. Uses the landscape photo if empty.' },
+              // Unused since the home portrait lost its frame; kept so no data is lost.
+              admin: { hidden: true },
             },
           ],
         },

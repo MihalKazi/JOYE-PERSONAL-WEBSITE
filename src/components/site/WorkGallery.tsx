@@ -66,7 +66,7 @@ export function WorkGallery({ works, title, intro }: { works: WorkItem[]; title:
     <>
       <div className="work__head">
         <div>
-          <h1 data-split>{title}</h1>
+          <h2 data-split>{title}</h2>
           {intro && (
             <p className="work__intro" data-split="lines">
               {intro}

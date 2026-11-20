@@ -818,7 +818,7 @@ export interface SiteSetting {
   id: number;
   name: string;
   /**
-   * Short line under your name on the home page.
+   * Line under the greeting on the home page, e.g. Information Science Student, Performing Artist…
    */
   tagline?: string | null;
   email?: string | null;
@@ -847,7 +847,7 @@ export interface SiteSetting {
   createdAt?: string | null;
 }
 /**
- * Your bio and portrait (the first page), and the landscape page behind the Explore button.
+ * Your greeting, bio and portrait (the first page), and the landscape page behind the Explore button.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "about-page".
@@ -862,16 +862,13 @@ export interface AboutPage {
   kicker?: string | null;
   title?: string | null;
   /**
-   * Leave an empty line between paragraphs.
+   * Leave an empty line between paragraphs. The first paragraph sits under the greeting; the rest appear in the Bio section below it.
    */
   bio: string;
   /**
-   * Shown on the white card.
+   * Your drawn portrait, shown on the home page beside the greeting.
    */
   portrait?: (number | null) | Media;
-  /**
-   * Optional. Uses the landscape photo if empty.
-   */
   frameImage?: (number | null) | Media;
   workTitle?: string | null;
   newsTitle?: string | null;

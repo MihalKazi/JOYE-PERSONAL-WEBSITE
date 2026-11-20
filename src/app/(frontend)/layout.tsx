@@ -1,16 +1,27 @@
-import type { Metadata } from 'next'
-import { Roboto, Roboto_Mono } from 'next/font/google'
+import type { Metadata, Viewport } from 'next'
+import { Anek_Bangla, IBM_Plex_Mono, Tiro_Bangla } from 'next/font/google'
 import React from 'react'
 
 import { SiteShell } from '@/components/site/SiteShell'
 import { Tabs } from '@/components/site/Tabs'
 import { WaveFooter } from '@/components/WaveFooter'
-import { mediaUrl } from '@/lib/media'
 import { getSettings } from '@/lib/payload'
 import './styles.css'
 
-const roboto = Roboto({ subsets: ['latin'], weight: ['300', '400', '500', '700', '900'], variable: '--font-roboto', display: 'swap' })
-const mono = Roboto_Mono({ subsets: ['latin'], weight: ['400', '500'], variable: '--font-mono', display: 'swap' })
+// Both families are drawn for Bangla and Latin together, so Bangla titles sit in the same voice as the English.
+// Tiro Bangla (calligraphic book serif) sets headings; Anek Bangla (variable sans) sets text and labels.
+const display = Tiro_Bangla({
+  subsets: ['latin', 'latin-ext', 'bengali'],
+  weight: '400',
+  style: ['normal', 'italic'],
+  variable: '--font-display',
+  display: 'swap',
+})
+const body = Anek_Bangla({ subsets: ['latin', 'latin-ext', 'bengali'], variable: '--font-body', display: 'swap' })
+const mono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400', '500'], variable: '--font-mono', display: 'swap' })
+
+// Phone browser bar takes the paper colour.
+export const viewport: Viewport = { themeColor: '#f6f1e9' }
 
 export async function generateMetadata(): Promise<Metadata> {
   const s = await getSettings()
@@ -24,7 +35,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const settings = await getSettings()
 
   return (
-    <html lang="en" className={`${roboto.variable} ${mono.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${display.variable} ${body.variable} ${mono.variable}`} suppressHydrationWarning>
       <head>
         {/* Hide animated elements before first paint (motion users only), so they never flash. */}
         <script
@@ -35,14 +46,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body>
         <SiteShell>
-          <Tabs />
+          <Tabs name={settings.name} />
           {children}
-          <WaveFooter
-            name={settings.name}
-            email={settings.email}
-            cvUrl={mediaUrl(settings.cv)}
-            links={(settings.links ?? []).map((l) => ({ label: l.label, url: l.url }))}
-          />
+          <WaveFooter name={settings.name} />
         </SiteShell>
       </body>
     </html>

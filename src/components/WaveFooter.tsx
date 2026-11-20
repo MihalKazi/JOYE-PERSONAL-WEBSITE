@@ -3,15 +3,8 @@
 import Link from 'next/link'
 import { useEffect, useRef } from 'react'
 
-type Props = {
-  name: string
-  email?: string | null
-  cvUrl?: string | null
-  links?: { label: string; url: string }[]
-}
-
-/** Slim footer: drifting wave lines on both sides of the name; waves draw outward when scrolled into view. */
-export function WaveFooter({ name, email, cvUrl, links = [] }: Props) {
+/** Slim footer: drifting wave lines on both sides of her name; waves draw outward when scrolled into view. */
+export function WaveFooter({ name }: { name: string }) {
   const ref = useRef<HTMLElement>(null)
 
   useEffect(() => {
@@ -38,19 +31,6 @@ export function WaveFooter({ name, email, cvUrl, links = [] }: Props) {
           <Link className="foot__name" href="/">
             {name}
           </Link>
-          <nav className="foot__links" aria-label="Contact">
-            {email && <a href={`mailto:${email}`}>Email</a>}
-            {links.map((l) => (
-              <a key={l.url + l.label} href={l.url} target="_blank" rel="noopener noreferrer">
-                {l.label}
-              </a>
-            ))}
-            {cvUrl && (
-              <a href={cvUrl} target="_blank" rel="noopener noreferrer">
-                CV
-              </a>
-            )}
-          </nav>
         </div>
         <div className="wave wave--r" aria-hidden="true" />
       </div>

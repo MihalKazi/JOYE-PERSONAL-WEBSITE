@@ -11,9 +11,18 @@ import { choreograph, leavePage } from '@/lib/motion'
 import { prefersReducedMotion } from '@/lib/noise'
 
 type Enter = (href: string, from: HTMLElement, image: { src: string; position: string }) => void
-type Ctx = { pauseScroll: (paused: boolean) => void; enter: Enter; prime: (src: string) => void }
+type Ctx = {
+  pauseScroll: (paused: boolean) => void
+  enter: Enter
+  prime: (src: string) => void
+  /** Smooth-scroll to a section on this page (by id), clear of the fixed header, and put it in the URL. */
+  scrollToSection: (id: string) => void
+}
 
-const SiteCtx = createContext<Ctx>({ pauseScroll: () => {}, enter: () => {}, prime: () => {} })
+const SiteCtx = createContext<Ctx>({ pauseScroll: () => {}, enter: () => {}, prime: () => {}, scrollToSection: () => {} })
+
+/** Height of the fixed header bar, if this page has one. */
+const headerOffset = () => document.querySelector<HTMLElement>('.masthead')?.offsetHeight ?? 0
 
 const nextFrame = () => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())))
 
@@ -100,6 +109,15 @@ export function SiteShell({ children }: { children: ReactNode }) {
       if (cancelled) return
       ctx = gsap.context(() => choreograph({ heroIntro: !!document.querySelector('.hero'), viaVeil }), root)
       ScrollTrigger.refresh()
+      // Links like /#blog: the page was reset to the top above, so go to the section now.
+      let target: HTMLElement | null = null
+      try {
+        target = location.hash ? document.querySelector<HTMLElement>(decodeURIComponent(location.hash)) : null
+      } catch {
+        /* not a valid selector */
+      }
+      // (offset: keep the section title clear of the fixed header bar)
+      if (target) lenis.current?.scrollTo(target, { immediate: true, force: true, offset: -headerOffset() })
     }
     // Wait for web fonts (headline line breaks) and, after the Explore transition, for the veil to lift.
     Promise.all([document.fonts.ready, lifted]).then(start)
@@ -202,11 +220,14 @@ export function SiteShell({ children }: { children: ReactNode }) {
               const nw = img.naturalWidth || 1600
               const nh = img.naturalHeight || 900
               const [px, py] = image.position.split(' ').map((v) => parseFloat(v) / 100)
+              // It lands where the landscape photo sits: under the header bar, 8% taller (parallax).
+              const T = headerOffset()
+              const Hh = innerHeight - T
               const W = innerWidth
-              const H = innerHeight * 1.08
+              const H = Hh * 1.08
               const sf = Math.max(W / nw, H / nh)
               const fx = (W - nw * sf) * px
-              const fy = -innerHeight * 0.08 + (H - nh * sf) * py
+              const fy = T - Hh * 0.08 + (H - nh * sf) * py
               const sb = Math.max(r.width / nw, r.height / nh)
               const sx = r.left + (r.width - nw * sb) * px
               const sy = r.top + (r.height - nh * sb) * py
@@ -232,7 +253,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
                   },
                   onComplete: () => resolve(),
                 })
-                .to(v, { clipPath: 'inset(0px 0px 0px 0px)' }, 0)
+                .to(v, { clipPath: `inset(${T}px 0px 0px 0px)` }, 0)
                 .to(img, { x: fx, y: fy, scale: 1 }, 0)
             }),
         )
@@ -240,9 +261,22 @@ export function SiteShell({ children }: { children: ReactNode }) {
     [router, prime],
   )
 
+  const scrollToSection = useCallback((id: string) => {
+    const el = document.getElementById(id)
+    if (!el) return
+    history.replaceState(null, '', `#${id}`)
+    if (lenis.current) lenis.current.scrollTo(el, { duration: 1.4, offset: -headerOffset() })
+    else window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - headerOffset() })
+  }, [])
+
   const value = useMemo<Ctx>(
-    () => ({ pauseScroll: (paused) => (paused ? lenis.current?.stop() : lenis.current?.start()), enter, prime }),
-    [enter, prime],
+    () => ({
+      pauseScroll: (paused) => (paused ? lenis.current?.stop() : lenis.current?.start()),
+      enter,
+      prime,
+      scrollToSection,
+    }),
+    [enter, prime, scrollToSection],
   )
 
   return (

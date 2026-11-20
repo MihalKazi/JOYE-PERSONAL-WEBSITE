@@ -19,7 +19,8 @@ export const SiteSettings: GlobalConfig = {
       name: 'tagline',
       type: 'text',
       defaultValue: 'archivist + researcher + dancer',
-      admin: { description: 'Short line under your name on the home page.' },
+      label: 'Roles',
+      admin: { description: 'Line under the greeting on the home page, e.g. Information Science Student, Performing Artist…' },
     },
     {
       type: 'row',

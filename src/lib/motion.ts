@@ -29,11 +29,10 @@ export function choreograph(opts: { heroIntro: boolean; viaVeil: boolean }) {
     else ScrollTrigger.create({ trigger: el, start: 'top 97%', once: true, onEnter: () => make(0) })
   }
 
-  // Landscape page intro: photo settles, tabs drop in, name surfaces from blur.
+  // Landscape page intro: photo settles, name surfaces from blur.
   if (opts.heroIntro) {
     const tl = gsap.timeline({ defaults: { ease: EASE } })
     if (!opts.viaVeil) tl.from('.hero__img', { scale: 1.14, opacity: 0, duration: 2.6, ease: 'power2.out' })
-    tl.from('.tab', { y: -50, opacity: 0, duration: 1.2, stagger: 0.06 }, opts.viaVeil ? 0.45 : 0.5)
     tl.from('.wordmark > *', { y: 14, opacity: 0, filter: 'blur(6px)', duration: 1.6, stagger: 0.15 }, opts.viaVeil ? 0.9 : 2.2)
     gsap.to('.hero__img', {
       yPercent: 12,
@@ -112,19 +111,13 @@ export function choreograph(opts: { heroIntro: boolean; viaVeil: boolean }) {
     play(el, (delay) => gsap.to(el, { autoAlpha: 1, y: 0, duration: 1.1, ease: EASE, delay }))
   })
 
-  // About frame: photo wipes in, card slides over, portrait "draws" downward.
-  if (document.querySelector('.frame')) {
-    gsap
-      .timeline({ defaults: { ease: EASE }, delay: 0.25 })
-      .fromTo('.frame__back', { clipPath: 'inset(0 0 0 100%)' }, { clipPath: 'inset(0 0 0 0%)', duration: 1.6, ease: 'power3.inOut' })
-      .fromTo('.frame__back img', { scale: 1.35 }, { scale: 1.15, duration: 2.2 }, 0)
-      .from('.frame__card', { xPercent: -18, opacity: 0, duration: 1.4 }, 0.7)
-      .fromTo('.frame__card img', { clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)', duration: 2.4, ease: 'power2.inOut' }, 1)
-    gsap.to('.frame__card', {
-      yPercent: -6,
-      ease: 'none',
-      scrollTrigger: { trigger: '.frame', start: 'top bottom', end: 'bottom top', scrub: true },
-    })
+  // Home portrait: the drawing "draws" itself downward.
+  if (document.querySelector('.intro__portrait .ripple')) {
+    gsap.fromTo(
+      '.intro__portrait .ripple',
+      { clipPath: 'inset(0 0 100% 0)' },
+      { clipPath: 'inset(0 0 0% 0)', duration: 2.4, ease: 'power2.inOut', delay: 0.3, clearProps: 'clipPath' },
+    )
   }
 
   // Gallery.
@@ -152,7 +145,7 @@ export function choreograph(opts: { heroIntro: boolean; viaVeil: boolean }) {
   }
 
   // Reading progress on long pages.
-  if (document.querySelector('.page')) {
+  if (document.querySelector('.page, .home, .explore-page')) {
     gsap.fromTo(
       '.progress',
       { scaleX: 0 },

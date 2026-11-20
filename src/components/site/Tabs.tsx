@@ -2,70 +2,93 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type MouseEvent } from 'react'
 
-import { DARK_PAGES, HOME_PAGES, NAV, WORK, inWork, isActive } from '@/lib/nav'
+import { HOME, NAV, WORK, inWork, isActive } from '@/lib/nav'
+import { useSite } from './SiteShell'
+
+const sectionId = (href: string) => href.split('#')[1] ?? ''
 
 /**
- * Top tabs (mockup 2). Main pages: Home · Explore my works · CV · Contact.
- * Inside "Explore my works" (the landscape page and its sections) the row
- * becomes Home + the sections instead.
+ * Site navigation: a white header bar that stays put on every page — her name on the left, the tabs
+ * on the right. Main pages: CV · Explore · Contact (Home in front off the home page).
+ * Explore (one long page): Home + its sections; they scroll to their section, and the one being
+ * read is lit.
  */
-export function Tabs() {
+export function Tabs({ name }: { name: string }) {
   const pathname = usePathname()
-  const [hidden, setHidden] = useState(false)
+  const { scrollToSection } = useSite()
+  const [scrolled, setScrolled] = useState(false)
+  const [current, setCurrent] = useState('') // Explore: id of the section being read
   const row = useRef<HTMLElement>(null)
   const work = inWork(pathname)
 
-  // Headroom: tuck the tabs away while reading downward, bring them back on any upward scroll.
   useEffect(() => {
-    let lastY = window.scrollY
     const onScroll = () => {
       const y = window.scrollY
-      if (Math.abs(y - lastY) < 8) return
-      setHidden(y > lastY && y > window.innerHeight * 0.4)
-      lastY = y
+      setScrolled(y > 8)
+      if (work) {
+        // the last section whose top has passed a third of the way down the screen
+        const line = window.innerHeight * 0.35
+        let id = ''
+        for (const w of WORK) {
+          const el = document.getElementById(sectionId(w.href))
+          if (el && el.getBoundingClientRect().top <= line) id = el.id
+        }
+        setCurrent(id)
+      }
     }
+    onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+  }, [work])
 
-  // New page: show the tabs and keep the active section in view on narrow screens.
+  // Keep the lit tab in view when the row scrolls sideways (narrow screens).
   useEffect(() => {
-    setHidden(false)
     const el = row.current
-    const active = el?.querySelector<HTMLElement>('[aria-current]')
+    const active = el?.querySelector<HTMLElement>('.is-active')
     if (el && active && el.scrollWidth > el.clientWidth) {
       el.scrollTo({ left: active.offsetLeft - 16, behavior: 'smooth' })
     }
-  }, [pathname])
+  }, [pathname, current])
 
-  const onLight = !DARK_PAGES.includes(pathname)
+  const items = work ? [HOME, ...WORK] : pathname === '/' ? NAV : [HOME, ...NAV]
+  const lit = (href: string) => {
+    if (href.includes('#')) return work && sectionId(href) === current
+    return href === '/explore' ? work : isActive(href, pathname)
+  }
+  // On Explore, section tabs scroll smoothly within the page instead of navigating.
+  const jump = (e: MouseEvent<HTMLAnchorElement>, href: string) => {
+    if (!work || !href.includes('#') || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return
+    e.preventDefault()
+    scrollToSection(sectionId(href))
+  }
 
-  // Inside "Explore my works": Home + the sections. Everywhere else: the main tabs.
-  const items = work ? [{ href: '/', label: 'Home' }, ...WORK] : NAV
-  const lit = (href: string) =>
-    href === '/explore' ? work : href === '/' ? pathname === '/' || HOME_PAGES.includes(pathname) : isActive(href, pathname)
+  const links = items.map((t) => {
+    const active = lit(t.href)
+    return (
+      <Link
+        key={t.href}
+        href={t.href}
+        className={`tab${active ? ' is-active' : ''}`}
+        aria-current={active ? (t.href.includes('#') ? 'location' : pathname === t.href ? 'page' : undefined) : undefined}
+        onClick={(e) => jump(e, t.href)}
+      >
+        {t.label}
+      </Link>
+    )
+  })
 
   return (
-    <nav
-      ref={row}
-      className={`tabs${onLight ? ' on-light' : ''}${hidden ? ' is-hidden' : ''}`}
-      aria-label={work ? 'Explore my works' : 'Main'}
-    >
-      {items.map((t) => {
-        const active = lit(t.href)
-        return (
-          <Link
-            key={t.href}
-            href={t.href}
-            className={`tab${active ? ' is-active' : ''}`}
-            aria-current={active && pathname === t.href ? 'page' : undefined}
-          >
-            {t.label}
-          </Link>
-        )
-      })}
-    </nav>
+    <header className={`masthead${work ? ' masthead--explore' : ''}${scrolled ? ' is-scrolled' : ''}`}>
+      <div className="masthead__in">
+        <Link href="/" className="masthead__name kicker">
+          {name}
+        </Link>
+        <nav ref={row} className="masthead__nav" aria-label={work ? 'Explore' : 'Main'}>
+          {links}
+        </nav>
+      </div>
+    </header>
   )
 }

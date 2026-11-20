@@ -14,6 +14,22 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // About, News, Talks and the blog list are sections of the home page now; the work sections are
+  // sections of Explore.
+  async redirects() {
+    return [
+      { source: '/about', destination: '/', permanent: false },
+      { source: '/news', destination: '/#news', permanent: false },
+      { source: '/talks', destination: '/#talks', permanent: false },
+      { source: '/blog', destination: '/#blog', permanent: false },
+      // The work sections are one page now: Explore.
+      { source: '/research', destination: '/explore#research', permanent: false },
+      { source: '/publications', destination: '/explore#publications', permanent: false },
+      { source: '/projects', destination: '/explore#projects', permanent: false },
+      { source: '/creative-practice', destination: '/explore#creative-practice', permanent: false },
+      { source: '/training', destination: '/explore#training', permanent: false },
+    ]
+  },
   webpack: (webpackConfig) => {
     webpackConfig.resolve.extensionAlias = {
       '.cjs': ['.cts', '.cjs'],

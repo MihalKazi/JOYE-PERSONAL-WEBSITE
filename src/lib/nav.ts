@@ -1,34 +1,26 @@
-/** Main nav (top row on every page). */
+export const HOME = { href: '/', label: 'Home' } as const
+
+/** Main nav: CV · Explore · Contact (Home is added in front everywhere but the home page). */
 export const NAV = [
-  { href: '/', label: 'Home' },
-  { href: '/explore', label: 'Explore my works' },
   { href: '/cv', label: 'CV' },
+  { href: '/explore', label: 'Explore' },
   { href: '/contact', label: 'Contact' },
 ] as const
 
-/** Pages reached from the home page (not listed in Explore my works); the Home tab stays lit on them. */
-export const HOME_PAGES = ['/about']
-
 /**
- * Sections inside "Explore my works", in the order of website.pdf, minus what the home page
- * already carries (About me). Shown as a second row on /explore and on these pages.
+ * Sections of the Explore page (one page; each tab jumps to its section — ids in explore/page.tsx),
+ * in the order of website.pdf. Bio, News, Talks and Blog are on the home page instead.
  */
 export const WORK = [
-  { href: '/research', label: 'Research' },
-  { href: '/publications', label: 'Publications' },
-  { href: '/projects', label: 'Projects' },
-  { href: '/blog', label: 'Blog' },
-  { href: '/news', label: 'News' },
-  { href: '/talks', label: 'Talks' },
-  { href: '/creative-practice', label: 'Creative practice' },
-  { href: '/training', label: 'Training' },
+  { href: '/explore#research', label: 'Research' },
+  { href: '/explore#publications', label: 'Publications' },
+  { href: '/explore#projects', label: 'Projects' },
+  { href: '/explore#creative-practice', label: 'Creative practice' },
+  { href: '/explore#training', label: 'Training' },
 ] as const
-
-/** Pages drawn on a photo or dark ground (tabs drop their hairline ring there). */
-export const DARK_PAGES = ['/explore', '/creative-practice']
 
 export const isActive = (href: string, pathname: string) =>
   href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`)
 
-/** True on the landscape page and on every section inside it. */
-export const inWork = (pathname: string) => isActive('/explore', pathname) || WORK.some((w) => isActive(w.href, pathname))
+/** True on the Explore page. */
+export const inWork = (pathname: string) => isActive('/explore', pathname)

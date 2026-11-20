@@ -24,7 +24,7 @@ const Arrow = () => (
 
 /**
  * A window onto the landscape page.
- * Hover: a strip of the landscape wipes in behind the label, letters roll, the arrow loops,
+ * The landscape shows through it at rest. Hover: black wipes in over it, letters roll, the arrow loops,
  * a light magnetic pull follows the pointer. Click: letters lift away and the same photo
  * grows out of the button into the full-screen page (shared-element transition).
  */
@@ -92,6 +92,7 @@ export function ExploreButton({ href, label, full, position }: Props) {
           </span>
         )}
       </span>
+      <span className="explore__ink" aria-hidden="true" />
       <span className="explore__label" aria-hidden="true">
         <span className="explore__text">
           {[...label].map((c, i) => (

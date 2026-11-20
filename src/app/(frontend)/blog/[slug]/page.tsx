@@ -7,6 +7,7 @@ import { notFound } from 'next/navigation'
 import { ArrowLeftIcon } from '@/components/icons'
 import { asMedia, focalPosition, mediaUrl } from '@/lib/media'
 import { getClient } from '@/lib/payload'
+import { tidyLinks } from '@/lib/richtext'
 
 type Params = { params: Promise<{ slug: string }> }
 
@@ -37,7 +38,7 @@ export default async function PostPage({ params }: Params) {
   return (
     <main className="page page--narrow">
       <article className="post">
-        <Link href="/blog" className="post__back mono">
+        <Link href="/#blog" className="post__back mono">
           <ArrowLeftIcon /> All posts
         </Link>
         <h1 className="post__title">{post.title}</h1>
@@ -61,7 +62,7 @@ export default async function PostPage({ params }: Params) {
           </div>
         )}
         <div className="post__body">
-          <RichText data={post.content} />
+          <RichText data={tidyLinks(post.content)} />
         </div>
         <div className="post__end" aria-hidden="true" />
       </article>
