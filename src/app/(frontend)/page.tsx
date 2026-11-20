@@ -2,16 +2,15 @@ import Link from 'next/link'
 
 import { NEWS_KINDS } from '@/collections/News'
 import { RippleImage } from '@/components/RippleImage'
-import { ExploreButton } from '@/components/site/ExploreButton'
 import { OutLink, paragraphs } from '@/components/site/PageHead'
 import { Section } from '@/components/site/Section'
 import { fullDate, monthYear } from '@/lib/format'
-import { asMedia, focalPosition, mediaUrl } from '@/lib/media'
+import { asMedia, mediaUrl } from '@/lib/media'
 import { getClient, getSettings } from '@/lib/payload'
 
 /**
  * Home (her name is in the header bar, see Tabs): her drawn portrait on the left; the greeting, roles,
- * a short intro and contact on the right;
+ * and a short intro on the right;
  * then the Bio, News, Talks and Blog sections. The other sections live under Explore.
  */
 /** The greeting's last word (her name) is set in italic: "Hello, I’m <em>Joye!</em>" */
@@ -75,19 +74,6 @@ export default async function HomePage() {
               {intro}
             </p>
           )}
-          <ExploreButton
-            href="/explore"
-            label="Explore the work"
-            full={mediaUrl(about.heroImage, 'hero')}
-            position={focalPosition(about.heroImage)}
-          />
-        </div>
-        <div className="intro__contact" data-reveal>
-          <h2>
-            <Link href="/contact">Contact</Link>
-          </h2>
-          {settings.email && <a href={`mailto:${settings.email}`}>{settings.email}</a>}
-          {settings.location && <span>{settings.location}</span>}
         </div>
       </section>
 

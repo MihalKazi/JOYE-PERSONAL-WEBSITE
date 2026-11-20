@@ -205,22 +205,17 @@ html { scrollbar-color: #b9b2ab var(--paper); accent-color: var(--red); caret-co
 
 /* Home intro: her drawn portrait on the left; greeting, roles, intro and contact on the right. */
 .intro {
-  display: grid; grid-template-columns: var(--cols); grid-template-rows: auto auto; align-content: center;
-  grid-template-areas: "media copy" "media contact";
+  display: grid; grid-template-columns: var(--cols); align-items: center;
+  grid-template-areas: "media copy";
   gap: 0 var(--intro-gap);
   max-width: 1440px; margin: 0 auto;
   padding: calc(var(--head-h) + clamp(48px, 9vh, 96px)) var(--gutter) 0;
 }
 .intro__copy { grid-area: copy; max-width: 620px; }
-.intro__copy h1 { font-family: var(--f-display); font-weight: 400; font-size: clamp(46px, 5.4vw, 84px); line-height: 1.04; letter-spacing: -0.015em; margin: 0 0 clamp(18px, 3vh, 26px); }
+.intro__copy h1 { font-family: var(--f-display); font-weight: 400; font-size: clamp(36px, 4vw, 60px); line-height: 1.06; letter-spacing: -0.015em; margin: 0 0 clamp(18px, 3vh, 26px); }
 .intro__copy h1 em { font-style: italic; }
 .intro__roles { font-size: clamp(16px, 1.25vw, 19px); font-weight: 500; line-height: 1.45; color: var(--ink); margin: 0 0 clamp(16px, 2.6vh, 24px); text-wrap: balance; }
-.intro__text { font-size: clamp(16px, 1.2vw, 18px); line-height: 1.65; color: var(--text); margin: 0 0 clamp(28px, 5vh, 44px); text-wrap: pretty; }
-.intro__contact { grid-area: contact; margin-top: clamp(36px, 6vh, 60px); }
-.intro__contact h2 { font-family: var(--f-display); font-weight: 400; font-size: 22px; margin: 0 0 6px; }
-.intro__contact h2 a:hover { color: var(--red); }
-.intro__contact > a, .intro__contact > span { display: block; font-size: 13px; letter-spacing: 0.02em; color: var(--ink-soft); overflow-wrap: anywhere; }
-.intro__contact > a:hover { color: var(--red); }
+.intro__text { font-size: clamp(16px, 1.2vw, 18px); line-height: 1.65; color: var(--text); margin: 0; text-wrap: pretty; }
 /* The drawing on the paper, no frame; kept to the screen height so the intro fits on one screen. */
 .intro__portrait { grid-area: media; align-self: center; }
 /* sized from the drawing's aspect ratio (--ar) so it never runs taller than the screen */
@@ -258,69 +253,17 @@ html { scrollbar-color: #b9b2ab var(--paper); accent-color: var(--red); caret-co
 @media (max-width: 900px) {
   .intro {
     grid-template-columns: minmax(0, 1fr); grid-template-rows: none;
-    grid-template-areas: "media" "copy" "contact";
+    grid-template-areas: "media" "copy";
     padding-top: calc(var(--head-h) + 8px); row-gap: 0;
   }
   .intro__portrait .ripple { width: min(70%, 300px); margin-inline: 0; }
   .intro__copy { padding-top: 28px; max-width: 60ch; }
-  .intro__contact { margin-top: 32px; }
   .sec { grid-template-columns: minmax(0, 1fr); padding-top: clamp(56px, 9vh, 88px); }
   .sec__head { position: static; }
   .bio p, .bio p > * { text-align: left; text-align-last: auto; }
 }
 
-/* Explore: a window onto the landscape page — the photo shows at rest.
-   Hover: black wipes in over it, letters roll, arrow loops. Click: black and letters leave, window widens. */
-.explore {
-  --h: 60px;
-  --wipe: 0.9s cubic-bezier(0.77, 0, 0.18, 1);
-  position: relative; isolation: isolate; overflow: hidden;
-  display: inline-flex; align-items: stretch; height: var(--h); margin-top: clamp(4px, 1vh, 12px);
-  background: var(--ink); color: #fff;
-  box-shadow: 0 14px 34px -18px rgba(27, 28, 29, 0.55);
-  transition: box-shadow 0.6s var(--ease);
-}
-.explore__window { position: absolute; inset: 0; z-index: -1; overflow: hidden; }
-/* dark scrim so the white label stays readable over the bright sky */
-.explore__window::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(12, 13, 13, 0.55), rgba(12, 13, 13, 0.2)); transition: opacity 0.4s var(--ease); }
-.explore__photo { position: absolute; inset: 0; display: block; scale: 1; transition: scale 1.4s var(--ease); }
-/* black layer that wipes in over the photo on hover */
-.explore__ink { position: absolute; inset: 0; z-index: -1; background: var(--ink); clip-path: inset(0 100% 0 0); transition: clip-path var(--wipe); }
-.explore__photo img { width: 100%; height: 100%; object-fit: cover; }
 
-.explore__label {
-  display: flex; align-items: center; padding: 0 30px 0 28px; overflow: hidden;
-  font-weight: 700; font-size: 12.5px; letter-spacing: 0.16em; text-transform: uppercase; white-space: nowrap;
-}
-/* one-line mask: the shadow copy waits just below it */
-.explore__text { display: inline-flex; overflow: hidden; height: 1.3em; line-height: 1.3em; }
-.explore__ch {
-  display: inline-block; text-shadow: 0 1.6em currentColor;
-  transition: translate 0.6s cubic-bezier(0.65, 0, 0.35, 1) calc(var(--i) * 22ms);
-}
-.explore__icon { position: relative; width: var(--h); overflow: hidden; background: var(--red); transition: background-color 0.5s var(--ease), opacity 0.35s var(--ease); }
-.explore__arrows { position: absolute; top: 0; bottom: 0; left: -100%; width: 200%; display: grid; grid-template-columns: 1fr 1fr; place-items: center; transition: translate 0.7s var(--ease); }
-
-.explore:hover .explore__ink, .explore:focus-visible .explore__ink { clip-path: inset(0 0 0 0); }
-.explore:hover .explore__photo, .explore:focus-visible .explore__photo { scale: 1.08; }
-.explore:hover .explore__ch, .explore:focus-visible .explore__ch { translate: 0 -1.6em; }
-.explore:hover .explore__arrows, .explore:focus-visible .explore__arrows { translate: 50% 0; }
-.explore:hover .explore__icon, .explore:focus-visible .explore__icon { background: rgba(162, 58, 58, 0.88); }
-.explore:hover { box-shadow: 0 24px 44px -20px rgba(12, 13, 13, 0.6); }
-.explore:focus-visible { outline: 2px solid var(--red); outline-offset: 4px; }
-
-/* Leaving: letters lift away, scrim and arrow fade, the bare photo fills the button */
-.explore.is-going { box-shadow: none; }
-.explore.is-going .explore__photo { scale: 1; transition-duration: 0.4s; }
-.explore.is-going .explore__ink { clip-path: inset(0 0 0 100%); transition-duration: 0.4s; }
-.explore.is-going .explore__window::after { opacity: 0; }
-.explore.is-going .explore__ch { translate: 0 -5em; transition-duration: 0.4s; transition-delay: calc(var(--i) * 12ms); }
-.explore.is-going .explore__icon { opacity: 0; }
-
-/* Veil: the photo that grows out of the Explore button and becomes the landscape page */
-.veil { position: fixed; inset: 0; z-index: 150; visibility: hidden; overflow: hidden; pointer-events: none; }
-.veil { will-change: clip-path, opacity; }
-.veil img { position: absolute; left: 0; top: 0; max-width: none; will-change: transform; }
 
 /* Work (mockup 3) */
 /* Creative practice: a dark band on the Explore page */
@@ -428,7 +371,6 @@ html { scrollbar-color: #b9b2ab var(--paper); accent-color: var(--red); caret-co
 }
 @media (max-width: 600px) {
   .tab { font-size: 11.5px; padding: 11px 14px; }
-  .explore { --h: 54px; }
   .row { grid-template-columns: 1fr; gap: 4px; padding: 22px 0; }
   .row__tag { display: inline; margin-left: 10px; }
   .cv-embed { display: none; }

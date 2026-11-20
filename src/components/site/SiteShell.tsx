@@ -10,50 +10,30 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, typ
 import { choreograph, leavePage } from '@/lib/motion'
 import { prefersReducedMotion } from '@/lib/noise'
 
-type Enter = (href: string, from: HTMLElement, image: { src: string; position: string }) => void
 type Ctx = {
   pauseScroll: (paused: boolean) => void
-  enter: Enter
-  prime: (src: string) => void
   /** Smooth-scroll to a section on this page (by id), clear of the fixed header, and put it in the URL. */
   scrollToSection: (id: string) => void
 }
 
-const SiteCtx = createContext<Ctx>({ pauseScroll: () => {}, enter: () => {}, prime: () => {}, scrollToSection: () => {} })
+const SiteCtx = createContext<Ctx>({ pauseScroll: () => {}, scrollToSection: () => {} })
 
 /** Height of the fixed header bar, if this page has one. */
 const headerOffset = () => document.querySelector<HTMLElement>('.masthead')?.offsetHeight ?? 0
 
-const nextFrame = () => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())))
-
-/** Resolves once the landscape page's photo has loaded and decoded (or after 2.5s at most). */
-const heroReady = () =>
-  new Promise<void>((resolve) => {
-    const img = document.querySelector<HTMLImageElement>('.hero__img img')
-    if (!img) return resolve()
-    const done = () => img.decode().catch(() => {}).then(() => resolve())
-    if (img.complete && img.naturalWidth) return done()
-    img.addEventListener('load', done, { once: true })
-    img.addEventListener('error', () => resolve(), { once: true })
-    setTimeout(resolve, 2500)
-  })
 export const useSite = () => useContext(SiteCtx)
 
 /**
  * Wraps every page: smooth scroll, the site's motion (rebuilt per page, see lib/motion),
- * page-leave transitions for internal links, the red cursor, reading progress, and the
- * "veil" — the photo that grows out of the Explore button into the landscape page.
+ * page-leave transitions for internal links, the red cursor and reading progress.
  */
 export function SiteShell({ children }: { children: ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
   const root = useRef<HTMLDivElement>(null)
   const cursor = useRef<HTMLDivElement>(null)
-  const veil = useRef<HTMLDivElement>(null)
   const lenis = useRef<Lenis | null>(null)
-  const arriving = useRef(false)
   const leaving = useRef(false)
-  const growDone = useRef<Promise<void>>(Promise.resolve())
 
   // Smooth scroll lives for the whole visit.
   useEffect(() => {
@@ -79,27 +59,6 @@ export function SiteShell({ children }: { children: ReactNode }) {
     gsap.set('.site main', { clearProps: 'opacity,visibility,transform' })
     lenis.current?.scrollTo(0, { immediate: true, force: true })
     lenis.current?.start()
-    const viaVeil = arriving.current
-    arriving.current = false
-
-    // Lift the veil only when the grow has finished AND the landscape photo is ready underneath,
-    // then fade it on the compositor (CSS) so page start-up work can't make it stutter.
-    let lifted: Promise<unknown> = Promise.resolve()
-    if (viaVeil && veil.current) {
-      const v = veil.current
-      lifted = (async () => {
-        await growDone.current
-        await heroReady()
-        await nextFrame()
-        v.style.transition = 'opacity 1s cubic-bezier(0.22, 0.8, 0.2, 1)'
-        v.style.opacity = '0'
-        window.setTimeout(() => {
-          v.style.transition = 'none'
-          v.style.visibility = 'hidden'
-          v.style.opacity = '1'
-        }, 1050)
-      })()
-    }
 
     if (prefersReducedMotion()) return
 
@@ -107,7 +66,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
     let cancelled = false
     const start = () => {
       if (cancelled) return
-      ctx = gsap.context(() => choreograph({ heroIntro: !!document.querySelector('.hero'), viaVeil }), root)
+      ctx = gsap.context(() => choreograph({ heroIntro: !!document.querySelector('.hero') }), root)
       ScrollTrigger.refresh()
       // Links like /#blog: the page was reset to the top above, so go to the section now.
       let target: HTMLElement | null = null
@@ -119,8 +78,8 @@ export function SiteShell({ children }: { children: ReactNode }) {
       // (offset: keep the section title clear of the fixed header bar)
       if (target) lenis.current?.scrollTo(target, { immediate: true, force: true, offset: -headerOffset() })
     }
-    // Wait for web fonts (headline line breaks) and, after the Explore transition, for the veil to lift.
-    Promise.all([document.fonts.ready, lifted]).then(start)
+    // Wait for web fonts (headline line breaks).
+    document.fonts.ready.then(start)
     return () => {
       cancelled = true
       ctx?.revert()
@@ -188,79 +147,6 @@ export function SiteShell({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  // Load and decode the Explore photo ahead of time so the click never waits on it.
-  const prime = useCallback((src: string) => {
-    const img = veil.current?.querySelector('img')
-    if (!img || img.getAttribute('src') === src) return
-    img.src = src
-    img.decode().catch(() => {})
-  }, [])
-
-  const enter = useCallback<Enter>(
-    (href, from, image) => {
-      const v = veil.current
-      const img = v?.querySelector('img')
-      if (!v || !img || prefersReducedMotion()) {
-        router.push(href)
-        return
-      }
-      const r = from.getBoundingClientRect()
-      lenis.current?.stop()
-      arriving.current = true
-      prime(image.src)
-
-      growDone.current = img
-        .decode()
-        .catch(() => {})
-        .then(
-          () =>
-            new Promise<void>((resolve) => {
-              // FLIP with transforms only: the photo is laid out once at its full-screen size and
-              // scaled/translated so that, at the start, it shows exactly the button's crop.
-              const nw = img.naturalWidth || 1600
-              const nh = img.naturalHeight || 900
-              const [px, py] = image.position.split(' ').map((v) => parseFloat(v) / 100)
-              // It lands where the landscape photo sits: under the header bar, 8% taller (parallax).
-              const T = headerOffset()
-              const Hh = innerHeight - T
-              const W = innerWidth
-              const H = Hh * 1.08
-              const sf = Math.max(W / nw, H / nh)
-              const fx = (W - nw * sf) * px
-              const fy = T - Hh * 0.08 + (H - nh * sf) * py
-              const sb = Math.max(r.width / nw, r.height / nh)
-              const sx = r.left + (r.width - nw * sb) * px
-              const sy = r.top + (r.height - nh * sb) * py
-
-              v.style.transition = 'none'
-              gsap.set(v, {
-                visibility: 'visible',
-                opacity: 1,
-                clipPath: `inset(${r.top}px ${W - r.right}px ${innerHeight - r.bottom}px ${r.left}px)`,
-              })
-              gsap.set(img, { width: nw * sf, height: nh * sf, transformOrigin: '0 0', x: sx, y: sy, scale: sb / sf, force3D: true })
-
-              let pushed = false
-              gsap
-                .timeline({
-                  defaults: { duration: 1.25, ease: 'expo.inOut' },
-                  onUpdate() {
-                    // Start loading the next page while the photo is still growing.
-                    if (!pushed && this.progress() > 0.45) {
-                      pushed = true
-                      router.push(href)
-                    }
-                  },
-                  onComplete: () => resolve(),
-                })
-                .to(v, { clipPath: `inset(${T}px 0px 0px 0px)` }, 0)
-                .to(img, { x: fx, y: fy, scale: 1 }, 0)
-            }),
-        )
-    },
-    [router, prime],
-  )
-
   const scrollToSection = useCallback((id: string) => {
     const el = document.getElementById(id)
     if (!el) return
@@ -272,11 +158,9 @@ export function SiteShell({ children }: { children: ReactNode }) {
   const value = useMemo<Ctx>(
     () => ({
       pauseScroll: (paused) => (paused ? lenis.current?.stop() : lenis.current?.start()),
-      enter,
-      prime,
       scrollToSection,
     }),
-    [enter, prime, scrollToSection],
+    [scrollToSection],
   )
 
   return (
@@ -284,10 +168,6 @@ export function SiteShell({ children }: { children: ReactNode }) {
       <div className="site" ref={root}>
         <div className="progress" aria-hidden="true" />
         {children}
-        <div className="veil" ref={veil} aria-hidden="true">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img alt="" />
-        </div>
         <div className="cursor" ref={cursor} aria-hidden="true" />
       </div>
     </SiteCtx.Provider>

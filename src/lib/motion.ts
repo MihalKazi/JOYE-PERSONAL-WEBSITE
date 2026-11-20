@@ -15,7 +15,7 @@ import { SplitText } from 'gsap/SplitText'
  * What is on screen at load plays as one sequence in reading order;
  * everything below the fold plays as it scrolls in.
  */
-export function choreograph(opts: { heroIntro: boolean; viaVeil: boolean }) {
+export function choreograph(opts: { heroIntro: boolean }) {
   gsap.registerPlugin(ScrollTrigger, SplitText)
 
   const EASE = 'expo.out'
@@ -32,8 +32,8 @@ export function choreograph(opts: { heroIntro: boolean; viaVeil: boolean }) {
   // Landscape page intro: photo settles, name surfaces from blur.
   if (opts.heroIntro) {
     const tl = gsap.timeline({ defaults: { ease: EASE } })
-    if (!opts.viaVeil) tl.from('.hero__img', { scale: 1.14, opacity: 0, duration: 2.6, ease: 'power2.out' })
-    tl.from('.wordmark > *', { y: 14, opacity: 0, filter: 'blur(6px)', duration: 1.6, stagger: 0.15 }, opts.viaVeil ? 0.9 : 2.2)
+    tl.from('.hero__img', { scale: 1.14, opacity: 0, duration: 2.6, ease: 'power2.out' })
+    tl.from('.wordmark > *', { y: 14, opacity: 0, filter: 'blur(6px)', duration: 1.6, stagger: 0.15 }, 2.2)
     gsap.to('.hero__img', {
       yPercent: 12,
       ease: 'none',
