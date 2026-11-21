@@ -866,12 +866,9 @@ export interface AboutPage {
    */
   roles?: string | null;
   /**
-   * The short paragraph beside your portrait, above the Explore button.
+   * The text beside your portrait. Leave an empty line between paragraphs.
    */
   intro?: string | null;
-  /**
-   * The Bio section further down the page. Leave an empty line between paragraphs.
-   */
   bio: string;
   /**
    * Your drawn portrait, shown on the home page beside the greeting.

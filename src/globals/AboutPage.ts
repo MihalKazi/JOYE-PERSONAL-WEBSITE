@@ -53,17 +53,15 @@ export const AboutPage: GlobalConfig = {
               name: 'intro',
               type: 'textarea',
               label: 'Text under the line',
-              admin: { rows: 5, description: 'The short paragraph beside your portrait, above the Explore button.' },
+              admin: { rows: 10, description: 'The text beside your portrait. Leave an empty line between paragraphs.' },
             },
             {
               name: 'bio',
               type: 'textarea',
               required: true,
               label: 'Bio',
-              admin: {
-                rows: 12,
-                description: 'The Bio section further down the page. Leave an empty line between paragraphs.',
-              },
+              // No longer shown (the Bio section was removed); kept, hidden, so no data is lost.
+              admin: { hidden: true },
             },
             {
               name: 'portrait',

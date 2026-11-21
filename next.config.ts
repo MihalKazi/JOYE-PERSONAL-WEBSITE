@@ -26,8 +26,7 @@ const nextConfig: NextConfig = {
       { source: '/research', destination: '/explore#research', permanent: false },
       { source: '/publications', destination: '/explore#publications', permanent: false },
       { source: '/projects', destination: '/explore#projects', permanent: false },
-      { source: '/creative-practice', destination: '/explore#creative-practice', permanent: false },
-      { source: '/training', destination: '/explore#training', permanent: false },
+      { source: '/training', destination: '/#training', permanent: false },
     ]
   },
   webpack: (webpackConfig) => {

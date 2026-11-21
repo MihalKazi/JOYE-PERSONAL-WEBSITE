@@ -22,12 +22,13 @@ export function Tabs({ name }: { name: string }) {
   const [current, setCurrent] = useState('') // Explore: id of the section being read
   const row = useRef<HTMLElement>(null)
   const work = inWork(pathname)
+  const onExplore = pathname === '/explore' // the page whose sections the hash tabs scroll to
 
   useEffect(() => {
     const onScroll = () => {
       const y = window.scrollY
       setScrolled(y > 8)
-      if (work) {
+      if (onExplore) {
         // the last section whose top has passed a third of the way down the screen
         const line = window.innerHeight * 0.35
         let id = ''
@@ -41,7 +42,7 @@ export function Tabs({ name }: { name: string }) {
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
-  }, [work])
+  }, [onExplore])
 
   // Keep the lit tab in view when the row scrolls sideways (narrow screens).
   useEffect(() => {
@@ -54,12 +55,13 @@ export function Tabs({ name }: { name: string }) {
 
   const items = work ? [HOME, ...WORK] : pathname === '/' ? NAV : [HOME, ...NAV]
   const lit = (href: string) => {
-    if (href.includes('#')) return work && sectionId(href) === current
-    return href === '/explore' ? work : isActive(href, pathname)
+    if (href.includes('#')) return onExplore && sectionId(href) === current
+    return href === '/explore' ? onExplore : isActive(href, pathname)
   }
-  // On Explore, section tabs scroll smoothly within the page instead of navigating.
+  // On Explore, section tabs scroll smoothly within the page instead of navigating (elsewhere they navigate).
   const jump = (e: MouseEvent<HTMLAnchorElement>, href: string) => {
-    if (!work || !href.includes('#') || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return
+    if (!onExplore || !href.includes('#') || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0)
+      return
     e.preventDefault()
     scrollToSection(sectionId(href))
   }
@@ -71,7 +73,15 @@ export function Tabs({ name }: { name: string }) {
         key={t.href}
         href={t.href}
         className={`tab${active ? ' is-active' : ''}`}
-        aria-current={active ? (t.href.includes('#') ? 'location' : pathname === t.href ? 'page' : undefined) : undefined}
+        aria-current={
+          active
+            ? t.href.includes('#')
+              ? 'location'
+              : pathname === t.href
+                ? 'page'
+                : undefined
+            : undefined
+        }
         onClick={(e) => jump(e, t.href)}
       >
         {t.label}
@@ -80,7 +90,9 @@ export function Tabs({ name }: { name: string }) {
   })
 
   return (
-    <header className={`masthead${work ? ' masthead--explore' : ''}${scrolled ? ' is-scrolled' : ''}`}>
+    <header
+      className={`masthead${work ? ' masthead--explore' : ''}${scrolled ? ' is-scrolled' : ''}`}
+    >
       <div className="masthead__in">
         <Link href="/" className="masthead__name kicker">
           {name}
