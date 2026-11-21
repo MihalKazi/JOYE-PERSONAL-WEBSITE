@@ -97,7 +97,7 @@ export function Tabs({ name }: { name: string }) {
         <Link href="/" className="masthead__name kicker">
           {name}
         </Link>
-        <nav ref={row} className="masthead__nav" aria-label={work ? 'Explore' : 'Main'}>
+        <nav ref={row} className="masthead__nav" aria-label={work ? 'Project' : 'Main'}>
           {links}
         </nav>
       </div>

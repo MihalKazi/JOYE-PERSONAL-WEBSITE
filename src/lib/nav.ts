@@ -3,7 +3,7 @@ export const HOME = { href: '/', label: 'Home' } as const
 /** Main nav: CV · Explore · Creative practice · Contact (Home is added in front everywhere but the home page). */
 export const NAV = [
   { href: '/cv', label: 'CV' },
-  { href: '/explore', label: 'Explore' },
+  { href: '/explore', label: 'Project' },
   { href: '/creative-practice', label: 'Creative practice' },
   { href: '/contact', label: 'Contact' },
 ] as const

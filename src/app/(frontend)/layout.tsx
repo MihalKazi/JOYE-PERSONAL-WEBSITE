@@ -4,7 +4,7 @@ import React from 'react'
 
 import { SiteShell } from '@/components/site/SiteShell'
 import { Tabs } from '@/components/site/Tabs'
-import { WaveFooter } from '@/components/WaveFooter'
+import { BirdFooter } from '@/components/BirdFooter'
 import { getAbout, getSettings } from '@/lib/payload'
 import './styles.css'
 
@@ -21,7 +21,7 @@ const body = Anek_Bangla({ subsets: ['latin', 'latin-ext', 'bengali'], variable:
 const mono = IBM_Plex_Mono({ subsets: ['latin'], weight: ['400', '500'], variable: '--font-mono', display: 'swap' })
 
 // Phone browser bar takes the paper colour.
-export const viewport: Viewport = { themeColor: '#f6f1e9' }
+export const viewport: Viewport = { themeColor: '#ffffff' }
 
 export async function generateMetadata(): Promise<Metadata> {
   const [s, about] = await Promise.all([getSettings(), getAbout()])
@@ -48,7 +48,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <SiteShell>
           <Tabs name={settings.name} />
           {children}
-          <WaveFooter name={settings.name} />
+          <BirdFooter name={settings.name} />
         </SiteShell>
       </body>
     </html>

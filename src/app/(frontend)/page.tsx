@@ -198,26 +198,34 @@ export default async function HomePage() {
 
       {trainings.docs.length > 0 && (
         <Section id="training" title="Training & certificates" intro={about.intros?.training}>
-          <div className="rows">
+          {/* Compact: one line of titles, each opening its certificate (or the course page). */}
+          <ul className="badges" data-reveal>
             {trainings.docs.map((t) => {
-              const cert = mediaUrl(t.certificate)
+              const href = mediaUrl(t.certificate) || t.link
+              const label = [t.organisation, t.year].filter(Boolean).join(', ')
+              const body = (
+                <>
+                  {t.title}
+                  {href && (
+                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M5 11l6-6M6 5h5v5" />
+                    </svg>
+                  )}
+                </>
+              )
               return (
-                <article key={t.id} className="row">
-                  <div className="row__meta mono">{t.year}</div>
-                  <div>
-                    <h3 className="row__title">{t.title}</h3>
-                    {t.organisation && <p className="row__sub">{t.organisation}</p>}
-                    {(t.link || cert) && (
-                      <div className="row__links">
-                        {cert && <OutLink href={cert}>Certificate</OutLink>}
-                        {t.link && <OutLink href={t.link}>Course</OutLink>}
-                      </div>
-                    )}
-                  </div>
-                </article>
+                <li key={t.id}>
+                  {href ? (
+                    <a href={href} target="_blank" rel="noopener noreferrer" title={label || undefined}>
+                      {body}
+                    </a>
+                  ) : (
+                    <span title={label || undefined}>{body}</span>
+                  )}
+                </li>
               )
             })}
-          </div>
+          </ul>
         </Section>
       )}
     </main>

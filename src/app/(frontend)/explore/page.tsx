@@ -7,7 +7,7 @@ import { Section } from '@/components/site/Section'
 import { asMedia, focalPosition, mediaUrl } from '@/lib/media'
 import { getAbout, getClient } from '@/lib/payload'
 
-export const metadata: Metadata = { title: 'Explore' }
+export const metadata: Metadata = { title: 'Project' }
 
 const RESEARCH_GROUPS: Record<string, string> = {
   current: 'Current research',
