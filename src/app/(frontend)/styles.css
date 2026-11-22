@@ -11,6 +11,7 @@
   --paper: #ffffff; /* white; the red portrait multiplies onto it */
   --line: #d9d9d9; /* rules */
   --line-soft: #ececec; /* row dividers */
+  --blush: #fbf3f0; /* a breath of her red ink on the paper: contact card */
   --night: #121313;
   --gutter: clamp(16px, 4.5vw, 72px);
   --head-h: clamp(72px, 11vh, 96px); /* header bar (name + main tabs) */
@@ -113,11 +114,39 @@ html { scrollbar-color: #b9b2ab var(--paper); accent-color: var(--red); caret-co
 
 /* Contact */
 /* Training: a compact run of titles with arrows, like the profile links in Contact */
-.badges { list-style: none; margin: 0; padding: 16px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line-soft); display: flex; flex-wrap: wrap; gap: 10px 28px; }
-.badges a, .badges span { font-size: 16.5px; line-height: 1.45; color: var(--ink); transition: color 0.25s; }
-.badges svg { display: inline-block; margin-left: 5px; vertical-align: -1px; color: var(--red); transition: transform 0.35s var(--ease); } /* arrow follows the last word when a title wraps */
-.badges a:hover { color: var(--red); }
-.badges a:hover svg { transform: translate(2px, -2px); }
+/* Long lists show three items; the rest wait behind “Show all N …” (Fold.tsx). */
+.is-folded > :nth-child(n + 4) { display: none; }
+.fold {
+  display: inline-flex; align-items: center; gap: 7px; margin-top: 14px; padding: 8px 0;
+  font-family: var(--f-mono); font-size: 12.5px; letter-spacing: 0.04em; color: var(--ink-soft); transition: color 0.25s;
+}
+.fold svg { color: var(--red); transition: transform 0.35s var(--ease); }
+.fold[aria-expanded="true"] svg { transform: rotate(180deg); }
+.fold:hover, .fold:focus-visible { color: var(--red); }
+.projects + .fold { margin-top: clamp(20px, 3vh, 32px); }
+
+/* Back to top (SiteShell): a small round button, bottom right, once the reader is a screen down. */
+.totop {
+  position: fixed; right: clamp(16px, 2.4vw, 32px); bottom: clamp(16px, 3vh, 32px); z-index: 40;
+  display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
+  background: var(--paper); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line), 0 6px 18px rgba(27, 28, 29, 0.08);
+  opacity: 0; visibility: hidden; transform: translateY(10px);
+  transition: opacity 0.35s var(--ease), transform 0.35s var(--ease), visibility 0s linear 0.35s, background-color 0.25s, color 0.25s;
+}
+.totop.is-on { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+.totop:hover, .totop:focus-visible { background: var(--red); color: var(--paper); box-shadow: inset 0 0 0 1px var(--red); }
+.totop:hover svg { transform: translateY(-2px); }
+.totop svg { transition: transform 0.35s var(--ease); }
+
+/* A single quiet way into a longer list on its own page ("Training & certificates ↗"), set like the contact links. */
+.go { margin: 0; padding: 16px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line-soft); }
+/* a section that is only such a link: closer to the one above, and no empty title column on small screens */
+.sec.sec--link { padding-top: clamp(28px, 4vh, 44px); }
+@media (max-width: 900px) { .sec--link > [aria-hidden] { display: none; } }
+.go a { display: inline-flex; align-items: center; gap: 6px; font-size: 16.5px; color: var(--ink); transition: color 0.25s; }
+.go svg { color: var(--red); transition: transform 0.35s var(--ease); }
+.go a:hover, .go a:focus-visible { color: var(--red); }
+.go a:hover svg { transform: translate(2px, -2px); }
 /* Contact (ContactDetails): slim label / value rows, like the dated rows in Talks */
 .reach { margin: 0; border-top: 1px solid var(--line); }
 .reach__row { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 4px 28px; align-items: baseline; padding: 16px 0; border-bottom: 1px solid var(--line-soft); }
@@ -232,7 +261,7 @@ html { scrollbar-color: #b9b2ab var(--paper); accent-color: var(--red); caret-co
 /* Home intro: her drawn portrait on the left; greeting, roles, intro and contact on the right. */
 .intro {
   display: grid; grid-template-columns: var(--cols); align-items: start; /* portrait top = greeting top */
-  grid-template-areas: "media copy";
+  grid-template-areas: "media copy" "card copy"; grid-template-rows: auto 1fr; /* contact card under the portrait */
   gap: 0 var(--intro-gap);
   max-width: 1440px; margin: 0 auto;
   padding: calc(var(--head-h) + clamp(48px, 9vh, 96px)) var(--gutter) 0;
@@ -264,6 +293,23 @@ html { scrollbar-color: #b9b2ab var(--paper); accent-color: var(--red); caret-co
   /* the drawing file has ~20% blank paper above the hair: pull it up so the ink starts level with the greeting */
   margin-top: calc(-0.23 * var(--pw) / var(--ar, 0.8));
 }
+/* Contact card under the portrait (as in the reference): a quiet panel with her email and profiles, icon first. */
+.card {
+  grid-area: card; align-self: start; max-width: 280px;
+  margin-top: clamp(24px, 4vh, 40px); padding: 18px 18px 12px; background: var(--blush);
+  box-shadow: inset 0 0 0 1px rgba(162, 58, 58, 0.12); border-top: 2px solid var(--red);
+}
+.card__title { margin: 0 0 8px; font-size: 12px; font-weight: 400; letter-spacing: 0.04em; color: var(--red); }
+.card__list { list-style: none; margin: 0; padding: 0; }
+.card__list a {
+  display: flex; align-items: center; gap: 10px; padding: 7px 0; font-size: 15px; line-height: 1.3;
+  color: var(--ink); overflow-wrap: anywhere; transition: color 0.25s;
+}
+.card__icon { flex: none; display: grid; place-items: center; width: 18px; height: 18px; color: var(--red-deep); transition: color 0.25s, transform 0.35s var(--ease); }
+.card__icon svg { width: 16px; height: 16px; }
+.card__list a:hover, .card__list a:focus-visible { color: var(--red); }
+.card__list a:hover .card__icon, .card__list a:focus-visible .card__icon { color: var(--red); transform: translateY(-1px); }
+
 /* Ripple image (RippleImage.tsx): the WebGL canvas lies exactly over the <img> and covers it once ready. */
 .ripple { position: relative; }
 .ripple img { width: 100%; height: auto; }
@@ -290,7 +336,7 @@ html { scrollbar-color: #b9b2ab var(--paper); accent-color: var(--red); caret-co
 @media (max-width: 900px) {
   .intro {
     grid-template-columns: minmax(0, 1fr); grid-template-rows: none;
-    grid-template-areas: "media" "copy";
+    grid-template-areas: "media" "copy" "card";
     padding-top: calc(var(--head-h) + 8px); row-gap: 0;
   }
   .intro__portrait { width: auto; padding-top: 0; }
@@ -374,45 +420,27 @@ html { scrollbar-color: #b9b2ab var(--paper); accent-color: var(--red); caret-co
 /* ================= Bird footer (all pages) ================= */
 /* sky and name share one cell: the name sits in the middle of the band the birds fly through */
 .foot { position: relative; z-index: 1; overflow: hidden; display: grid; align-items: center; background: var(--paper); padding: clamp(20px, 4vh, 44px) 0 clamp(24px, 4vh, 44px); font-family: var(--f-body); }
-/* A few shadow birds cross the page right to left, wings beating; they rest while the footer is out of view. */
-.foot__sky { grid-area: 1 / 1; position: relative; z-index: 1; height: clamp(130px, 13vw, 190px); }
+/* Wave lines of small birds cross right to left, rising and falling; they rest while the footer is out of view. */
+.foot__sky { grid-area: 1 / 1; position: relative; z-index: 1; height: clamp(110px, 10vw, 150px); }
 .bird {
   position: absolute; left: 0; top: var(--top); width: var(--size); opacity: var(--o); color: var(--ink);
   animation: birdFly var(--dur) linear var(--delay) infinite; will-change: transform;
 }
+.bird__bob { display: block; animation: birdBob var(--bob) ease-in-out var(--delay) infinite alternate; }
 .bird svg { display: block; width: 100%; height: auto; fill: currentColor; transform-origin: 50% 60%; animation: birdFlap var(--flap) ease-in-out infinite alternate; }
-.foot:not(.is-in) .bird, .foot:not(.is-in) .bird svg { animation-play-state: paused; }
+.foot:not(.is-in) .bird, .foot:not(.is-in) .bird__bob, .foot:not(.is-in) .bird svg { animation-play-state: paused; }
 @keyframes birdFly {
-  from { transform: translate3d(calc(100vw + 40px), 0, 0); }
-  50% { transform: translate3d(50vw, -10px, 0); }
-  to { transform: translate3d(-60px, 0, 0); }
+  from { transform: translate3d(calc(100vw + 30px), 0, 0); }
+  to { transform: translate3d(-40px, 0, 0); }
 }
-@keyframes birdFlap { from { transform: scaleY(1); } to { transform: scaleY(-0.55); } }
-/* Misty horizon: a pale treeline (with one lone tree, as in her landscape photo) under drifting grey haze. */
-.foot__horizon { position: absolute; left: 0; right: 0; bottom: 0; height: clamp(56px, 7vw, 96px); pointer-events: none; overflow: hidden; }
-.foot__horizon svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-.foot__trees { fill: #b7bdbb; }
-.foot__trees--far { fill: #d8dcdb; }
-.foot__trees--lone { fill: #9ca3a1; }
-.foot__haze {
-  position: absolute; top: 0; bottom: 0; left: 0; width: 200%;
-  background:
-    radial-gradient(ellipse 22% 60% at 12% 70%, rgba(255, 255, 255, 0.85), transparent 70%),
-    radial-gradient(ellipse 18% 50% at 38% 55%, rgba(255, 255, 255, 0.7), transparent 70%),
-    radial-gradient(ellipse 26% 70% at 63% 75%, rgba(255, 255, 255, 0.85), transparent 70%),
-    radial-gradient(ellipse 16% 45% at 86% 60%, rgba(255, 255, 255, 0.7), transparent 70%);
-  background-size: 50% 100%; background-repeat: repeat-x;
-  animation: hazeDrift 90s linear infinite; will-change: transform;
-}
-/* the ground fades into the page at the very bottom */
-.foot__horizon::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, var(--paper) 0%, transparent 22%); }
-.foot:not(.is-in) .foot__haze { animation-play-state: paused; }
-@keyframes hazeDrift { to { transform: translateX(-50%); } }
+@keyframes birdBob { from { transform: translateY(calc(-1 * var(--amp))); } to { transform: translateY(var(--amp)); } }
+@keyframes birdFlap { from { transform: scaleY(1); } to { transform: scaleY(0.3); } }
+@media (max-width: 600px) { .bird--alt { display: none; } }
 .foot__brand { grid-area: 1 / 1; position: relative; z-index: 2; text-align: center; opacity: 0; transform: translateY(14px); transition: opacity 1.1s var(--ease) 0.25s, transform 1.1s var(--ease) 0.25s; }
 .foot.is-in .foot__brand, .foot.was-in .foot__brand { opacity: 1; transform: none; }
 .foot .foot__name {
   display: inline-block; color: var(--ink); font-family: var(--f-display); font-weight: 400;
-  font-size: clamp(26px, 3.2vw, 46px); letter-spacing: -0.01em; line-height: 1.1; white-space: nowrap; transition: color 0.25s;
+  font-size: clamp(20px, 2.1vw, 30px); letter-spacing: -0.005em; line-height: 1.1; white-space: nowrap; transition: color 0.25s;
   text-shadow: 0 0 14px var(--paper), 0 0 6px var(--paper), 0 0 2px var(--paper); /* birds pass behind the name */
 }
 .foot .foot__name em { font-style: italic; }
@@ -457,6 +485,7 @@ html { scrollbar-color: #b9b2ab var(--paper); accent-color: var(--red); caret-co
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: 0.01ms !important; animation: none !important; }
-  .bird { transform: translateX(var(--x)); } /* a still flock, spread across */
+  .bird { transform: translateX(var(--x)); } /* still wave lines, spread across */
+  .bird__bob { transform: translateY(var(--ry)); }
   .foot__brand { opacity: 1; transform: none; }
 }

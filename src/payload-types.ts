@@ -337,7 +337,7 @@ export interface News {
   source?: string | null;
   summary?: string | null;
   link?: string | null;
-  kind: 'media' | 'interview' | 'announcement' | 'award' | 'conference' | 'other';
+  kind: 'media' | 'article' | 'talk' | 'interview' | 'announcement' | 'award' | 'conference' | 'other';
   date: string;
   updatedAt: string;
   createdAt: string;

@@ -8,10 +8,10 @@ import { WorkGallery, type WorkItem } from '@/components/site/WorkGallery'
 import { asMedia, focalPosition, mediaUrl } from '@/lib/media'
 import { getAbout, getClient, getSettings } from '@/lib/payload'
 
-export const metadata: Metadata = { title: 'Creative practice' }
+export const metadata: Metadata = { title: 'Creative portfolio' }
 
 /**
- * Creative practice: the landscape page (full-screen photo, drifting mist, contour lines), then the
+ * Creative portfolio: the landscape page (full-screen photo, drifting mist, contour lines), then the
  * dark gallery band with filters and lightbox.
  */
 export default async function CreativePracticePage() {
@@ -74,7 +74,7 @@ export default async function CreativePracticePage() {
         </div>
       </section>
 
-      <section className="work" id="creative-practice" aria-label="Creative practice">
+      <section className="work" id="creative-portfolio" aria-label="Creative portfolio">
         <div
           className="work__bg"
           aria-hidden="true"
@@ -83,7 +83,7 @@ export default async function CreativePracticePage() {
         <div className="work__inner">
           <WorkGallery
             works={workItems}
-            title={about.workTitle || 'Creative practice'}
+            title={about.workTitle || 'Creative portfolio'}
             intro={
               about.intros?.creative ||
               'Kathak dance, theatre and choreography — with drawings and photographs.'

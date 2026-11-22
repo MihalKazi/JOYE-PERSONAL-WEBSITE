@@ -3,6 +3,7 @@ import Image from 'next/image'
 
 import { RESEARCH_STATUS } from '@/collections/Research'
 import { Empty, OutLink, paragraphs } from '@/components/site/PageHead'
+import { Fold } from '@/components/site/Fold'
 import { Section } from '@/components/site/Section'
 import { asMedia, focalPosition, mediaUrl } from '@/lib/media'
 import { getAbout, getClient } from '@/lib/payload'
@@ -25,7 +26,7 @@ const PUBLICATION_KINDS: Record<string, string> = {
 
 /**
  * Explore: her research, publications and projects on one page. The tab row jumps between them
- * (ids match lib/nav WORK); Creative practice has its own page.
+ * (ids match lib/nav WORK); Creative portfolio has its own page.
  */
 export default async function ExplorePage() {
   const payload = await getClient()
@@ -51,7 +52,7 @@ export default async function ExplorePage() {
             <h3 className="group__title" data-reveal>
               {g.title}
             </h3>
-            <div className="rows">
+            <Fold className="rows" noun="research items">
               {g.docs.map((d) => (
                 <article key={d.id} className="row">
                   <div className="row__meta mono">{d.period}</div>
@@ -75,7 +76,7 @@ export default async function ExplorePage() {
                   </div>
                 </article>
               ))}
-            </div>
+            </Fold>
           </div>
         ))}
       </Section>
@@ -84,7 +85,7 @@ export default async function ExplorePage() {
         {pubs.docs.length === 0 ? (
           <Empty />
         ) : (
-          <div className="rows">
+          <Fold className="rows" noun="publications">
             {pubs.docs.map((p) => {
               const pdf = mediaUrl(p.file)
               return (
@@ -114,7 +115,7 @@ export default async function ExplorePage() {
                 </article>
               )
             })}
-          </div>
+          </Fold>
         )}
       </Section>
 
@@ -122,7 +123,7 @@ export default async function ExplorePage() {
         {projects.docs.length === 0 ? (
           <Empty />
         ) : (
-          <div className="projects">
+          <Fold className="projects" noun="projects">
             {projects.docs.map((p) => {
               const img = asMedia(p.image)
               const url = mediaUrl(img, 'large')
@@ -160,7 +161,7 @@ export default async function ExplorePage() {
                 </article>
               )
             })}
-          </div>
+          </Fold>
         )}
       </Section>
     </main>

@@ -3,7 +3,8 @@ import Link from 'next/link'
 import { NEWS_KINDS } from '@/collections/News'
 import { RippleImage } from '@/components/RippleImage'
 import { OutLink, paragraphs } from '@/components/site/PageHead'
-import { ContactDetails } from '@/components/site/ContactDetails'
+import { ContactCard } from '@/components/site/ContactCard'
+import { Fold } from '@/components/site/Fold'
 import { Section } from '@/components/site/Section'
 import { fullDate, monthYear } from '@/lib/format'
 import { asMedia, mediaUrl } from '@/lib/media'
@@ -12,7 +13,7 @@ import { getClient, getSettings } from '@/lib/payload'
 /**
  * Home (her name is in the header bar, see Tabs): her drawn portrait on the left; the greeting, roles,
  * and a short intro on the right;
- * then Contact, News, Talks, Blog and Training. The other sections live under Explore.
+ * with a small contact card beside it; then News, Talks, Blog and Training. The other sections live under Project.
  */
 /** The greeting's last word (her name) is set in italic: "Hello, I’m <em>Joye!</em>" */
 const greeting = (title?: string | null) => {
@@ -42,7 +43,7 @@ export default async function HomePage() {
       where: { _status: { equals: 'published' } },
       select: { title: true, slug: true, publishedDate: true, excerpt: true },
     }),
-    payload.find({ collection: 'trainings', sort: '-year', limit: 300, depth: 1 }),
+    payload.find({ collection: 'trainings', limit: 1, depth: 0 }), // only the count: the list is at /training
   ])
 
   // Home page fields, top to bottom: greeting, line under it, text under that.
@@ -84,24 +85,15 @@ export default async function HomePage() {
             </p>
           ))}
         </div>
-      </section>
-
-      <Section
-        id="contact"
-        title="Contact"
-        intro={about.intros?.contact || 'For research, opportunities and collaborations.'}
-      >
-        <ContactDetails
+        <ContactCard
           email={settings.email}
           links={(settings.links ?? []).map((l) => ({ label: l.label, url: l.url }))}
-          cvUrl={mediaUrl(settings.cv)}
-          location={settings.location}
         />
-      </Section>
+      </section>
 
       {news.docs.length > 0 && (
         <Section id="news" title="News" intro={about.intros?.news}>
-          <div className="rows">
+          <Fold className="rows" noun="news items">
             {news.docs.map((n) => (
               <article key={n.id} className="row">
                 <div className="row__meta mono">
@@ -116,19 +108,19 @@ export default async function HomePage() {
                   {n.summary && <p className="row__body">{n.summary}</p>}
                   {n.link && (
                     <div className="row__links">
-                      <OutLink href={n.link}>Read</OutLink>
+                      <OutLink href={n.link}>{/youtube\.com|youtu\.be|vimeo\.com/i.test(n.link) ? 'Watch' : 'Read'}</OutLink>
                     </div>
                   )}
                 </div>
               </article>
             ))}
-          </div>
+          </Fold>
         </Section>
       )}
 
       {talks.docs.length > 0 && (
         <Section id="talks" title="Talks" intro={about.intros?.talks}>
-          <div className="rows">
+          <Fold className="rows" noun="talks">
             {talks.docs.map((t) => {
               const links = [
                 ...(t.link ? [{ label: 'Event', url: t.link }] : []),
@@ -176,13 +168,13 @@ export default async function HomePage() {
                 </article>
               )
             })}
-          </div>
+          </Fold>
         </Section>
       )}
 
       {posts.docs.length > 0 && (
         <Section id="blog" title="Blog" intro={about.intros?.blog}>
-          <div className="rows">
+          <Fold className="rows" noun="posts">
             {posts.docs.map((p) => (
               <Link key={p.id} href={`/blog/${p.slug}`} className="row row--link">
                 <div className="row__meta mono">{fullDate(p.publishedDate)}</div>
@@ -192,41 +184,23 @@ export default async function HomePage() {
                 </div>
               </Link>
             ))}
-          </div>
+          </Fold>
         </Section>
       )}
 
-      {trainings.docs.length > 0 && (
-        <Section id="training" title="Training & certificates" intro={about.intros?.training}>
-          {/* Compact: one line of titles, each opening its certificate (or the course page). */}
-          <ul className="badges" data-reveal>
-            {trainings.docs.map((t) => {
-              const href = mediaUrl(t.certificate) || t.link
-              const label = [t.organisation, t.year].filter(Boolean).join(', ')
-              const body = (
-                <>
-                  {t.title}
-                  {href && (
-                    <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d="M5 11l6-6M6 5h5v5" />
-                    </svg>
-                  )}
-                </>
-              )
-              return (
-                <li key={t.id}>
-                  {href ? (
-                    <a href={href} target="_blank" rel="noopener noreferrer" title={label || undefined}>
-                      {body}
-                    </a>
-                  ) : (
-                    <span title={label || undefined}>{body}</span>
-                  )}
-                </li>
-              )
-            })}
-          </ul>
-        </Section>
+      {trainings.totalDocs > 0 && (
+        // The title is itself the way in (like “Read the CV ↗”): the full list is on its own page.
+        <section className="sec sec--link" id="training" aria-label="Training & certificates">
+          <div aria-hidden="true" />
+          <p className="go" data-reveal>
+            <Link href="/training">
+              Training &amp; certificates
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M5 11l6-6M6 5h5v5" />
+              </svg>
+            </Link>
+          </p>
+        </section>
       )}
     </main>
   )

@@ -10,7 +10,7 @@ export const WORK_CATEGORIES = [
 
 export const Works: CollectionConfig = {
   slug: 'works',
-  labels: { singular: 'Work', plural: 'Creative practice' },
+  labels: { singular: 'Work', plural: 'Creative portfolio' },
   orderable: true,
   admin: {
     group: 'Portfolio',

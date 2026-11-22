@@ -95,7 +95,7 @@ export const AboutPage: GlobalConfig = {
                 { name: 'blog', type: 'textarea', admin: { rows: 2 } },
                 { name: 'news', type: 'textarea', admin: { rows: 2 } },
                 { name: 'talks', type: 'textarea', admin: { rows: 2 } },
-                { name: 'creative', type: 'textarea', label: 'Creative practice', admin: { rows: 2 } },
+                { name: 'creative', type: 'textarea', label: 'Creative portfolio', admin: { rows: 2 } },
                 { name: 'cv', type: 'textarea', label: 'CV', admin: { rows: 2 } },
                 { name: 'training', type: 'textarea', admin: { rows: 2 } },
                 { name: 'contact', type: 'textarea', admin: { rows: 2 } },

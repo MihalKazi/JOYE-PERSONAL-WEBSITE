@@ -5,7 +5,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Lenis from 'lenis'
 import 'lenis/dist/lenis.css'
 import { usePathname, useRouter } from 'next/navigation'
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 
 import { choreograph, leavePage } from '@/lib/motion'
 import { prefersReducedMotion } from '@/lib/noise'
@@ -34,6 +34,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
   const cursor = useRef<HTMLDivElement>(null)
   const lenis = useRef<Lenis | null>(null)
   const leaving = useRef(false)
+  const [farDown, setFarDown] = useState(false) // shows the back-to-top button
 
   // Smooth scroll lives for the whole visit.
   useEffect(() => {
@@ -147,6 +148,21 @@ export function SiteShell({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  // Back to top: offered once the reader is more than a screen down.
+  useEffect(() => {
+    const onScroll = () => setFarDown(window.scrollY > window.innerHeight * 1.2)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [pathname])
+
+  const toTop = () => {
+    if (lenis.current) lenis.current.scrollTo(0, { duration: 1.4 })
+    else window.scrollTo({ top: 0 })
+    if (location.hash) history.replaceState(null, '', location.pathname + location.search)
+    document.querySelector<HTMLElement>('.masthead__name')?.focus({ preventScroll: true })
+  }
+
   const scrollToSection = useCallback((id: string) => {
     const el = document.getElementById(id)
     if (!el) return
@@ -168,6 +184,17 @@ export function SiteShell({ children }: { children: ReactNode }) {
       <div className="site" ref={root}>
         <div className="progress" aria-hidden="true" />
         {children}
+        <button
+          type="button"
+          className={`totop${farDown ? ' is-on' : ''}`}
+          onClick={toTop}
+          aria-label="Back to top"
+          tabIndex={farDown ? 0 : -1}
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M8 13V3.5M3.5 8 8 3.5 12.5 8" />
+          </svg>
+        </button>
         <div className="cursor" ref={cursor} aria-hidden="true" />
       </div>
     </SiteCtx.Provider>

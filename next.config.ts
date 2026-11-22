@@ -21,12 +21,11 @@ const nextConfig: NextConfig = {
       { source: '/about', destination: '/', permanent: false },
       { source: '/news', destination: '/#news', permanent: false },
       { source: '/talks', destination: '/#talks', permanent: false },
-      { source: '/blog', destination: '/#blog', permanent: false },
       // The work sections are one page now: Explore.
       { source: '/research', destination: '/explore#research', permanent: false },
       { source: '/publications', destination: '/explore#publications', permanent: false },
       { source: '/projects', destination: '/explore#projects', permanent: false },
-      { source: '/training', destination: '/#training', permanent: false },
+      { source: '/creative-practice', destination: '/creative-portfolio', permanent: true },
     ]
   },
   webpack: (webpackConfig) => {

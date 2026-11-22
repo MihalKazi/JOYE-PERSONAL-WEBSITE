@@ -8,88 +8,40 @@ import { useEffect, useRef } from 'react'
 const BIRD = 'M0 6C6 1 13 1 20 8 27 1 34 1 40 6 34 4.6 28 6 21.4 13.6L20 15.4l-1.4-1.8C12 6 6 4.6 0 6Z'
 
 /**
- * The flock, spread evenly around the loop so birds keep arriving without gaps: each starts a different
- * fraction of the way across (negative delay), so at any moment some are entering, crossing and leaving.
- * Bigger birds are darker and a little faster, so they read as nearer. Seeded, so server and browser agree.
+ * Wave lines drawn by small birds. Each strand is a string of birds that fly the same path across the
+ * footer, right to left, rising and falling as they go; spaced evenly in time along that path, together
+ * they trace a gentle wave that keeps flowing past her name. A bird's rise and fall shares its crossing's
+ * delay, so every bird on a strand sits on the same curve. Seeded, so server and browser agree.
  */
-const COUNT = 14
+type Strand = { top: number; amp: number; dur: number; bob: number; count: number; size: [number, number]; o: number }
+const STRANDS: Strand[] = [
+  { top: 26, amp: 20, dur: 40, bob: 13, count: 30, size: [11, 15], o: 0.8 },
+  { top: 70, amp: 15, dur: 50, bob: 15, count: 30, size: [9, 13], o: 0.55 },
+]
+
 const FLOCK = (() => {
   let s = 11
   const rand = () => (s = (s * 16807) % 2147483647) / 2147483647
-  return Array.from({ length: COUNT }, (_, i) => {
-    const near = rand() // 0 far … 1 near
-    const dur = 40 - near * 12 // 28–40s to cross
-    return {
-      top: 6 + rand() * 76,
-      size: Math.round(18 + near * 28), // 18–46px wingspan
-      dur,
-      delay: -dur * ((i + rand() * 0.6) / COUNT),
-      flap: 0.3 + near * 0.18,
-      o: 0.42 + near * 0.52,
-      x: ((i + 0.5) / COUNT) * 100, // resting place when motion is reduced
-    }
-  })
+  return STRANDS.flatMap((st, k) =>
+    Array.from({ length: st.count }, (_, i) => {
+      const f = i / st.count // where along the strand
+      return {
+        key: `${k}-${i}`,
+        top: st.top + (rand() - 0.5) * 2, // a little loose, not a ruled line
+        amp: st.amp,
+        size: Math.round(st.size[0] + rand() * (st.size[1] - st.size[0])),
+        dur: st.dur,
+        delay: -st.dur * f,
+        bob: st.bob / 2, // one way; the animation runs back and forth
+        flap: 0.26 + rand() * 0.14,
+        o: st.o,
+        alt: i % 2 === 1, // dropped on small screens, where the strand is shorter
+        x: (1 - f) * 100, // resting place when motion is reduced
+        ry: Math.sin(f * Math.PI * 6 + k) * st.amp,
+      }
+    }),
+  )
 })()
-
-/**
- * A treeline on the horizon, as in her landscape photo. Each tree is a crown of a few overlapping lumps
- * (so it reads as foliage, not a dome); trees stand in loose clumps along a low ground line with gaps of
- * open field. The outline is the highest lump over each point, sampled every few units and closed down to
- * the bottom. Seeded, so server and browser agree.
- */
-type Lump = { cx: number; cy: number; r: number }
-const W = 1600
-const H = 80
-
-function crown(rand: () => number, cx: number, ground: number, w: number, h: number, n: number): Lump[] {
-  const lumps: Lump[] = []
-  for (let k = 0; k < n; k++) {
-    const t = n === 1 ? 0.5 : k / (n - 1) // across the crown
-    const r = w * (0.22 + rand() * 0.16)
-    const lift = Math.sin(t * Math.PI) * 0.35 + 0.65 // the middle stands taller
-    lumps.push({ cx: cx - w / 2 + t * w + (rand() - 0.5) * r * 0.6, cy: ground - h * lift + r * 0.55, r })
-  }
-  return lumps
-}
-
-function outline(lumps: Lump[], ground: number) {
-  let d = `M0 ${H}`
-  for (let x = 0; x <= W; x += 3) {
-    let y = ground + Math.sin(x / 140) * 1.2
-    for (const l of lumps) {
-      const dx = x - l.cx
-      if (Math.abs(dx) < l.r) y = Math.min(y, l.cy - Math.sqrt(l.r * l.r - dx * dx))
-    }
-    d += ` L${x} ${y.toFixed(1)}`
-  }
-  return `${d} L${W} ${H}Z`
-}
-
-function treeline(seed: number, ground: number, size: [number, number], gapChance: number) {
-  let s = seed
-  const rand = () => (s = (s * 16807) % 2147483647) / 2147483647
-  const lumps: Lump[] = []
-  for (let x = -30; x < W + 30; ) {
-    const w = size[0] + rand() * (size[1] - size[0])
-    lumps.push(...crown(rand, x + w / 2, ground, w, w * (0.45 + rand() * 0.4), 3 + Math.floor(rand() * 3)))
-    x += w * (0.7 + rand() * 0.4) + (rand() < gapChance ? 40 + rand() * 180 : 0)
-  }
-  return outline(lumps, ground)
-}
-
-/** The lone tree from the photo: a wide umbrella crown (overlapping circles) on a short, visible trunk. */
-function loneTree(cx: number, ground: number) {
-  let s = 42
-  const rand = () => (s = (s * 16807) % 2147483647) / 2147483647
-  const lumps = crown(rand, cx, ground - 30, 50, 8, 7)
-  const crownBottom = Math.max(...lumps.map((l) => l.cy)) - 1
-  const trunk = `M${cx - 1.8} ${ground} L${cx - 1} ${crownBottom} L${cx + 1.2} ${crownBottom} L${cx + 2} ${ground}Z`
-  return { lumps, trunk }
-}
-
-const FAR = treeline(5, 70, [7, 16], 0.2)
-const NEAR = treeline(19, 74, [10, 24], 0.45)
-const LONE = loneTree(980, 75)
 
 /** Her name with the last word in italic, like the greeting on the home page. */
 const signature = (name: string) => {
@@ -104,7 +56,7 @@ const signature = (name: string) => {
   )
 }
 
-/** Footer: shadow birds drift over a misty horizon, around her name. They only fly while in view. */
+/** Footer: wave lines of small birds flowing past her name. They only fly while in view. */
 export function BirdFooter({ name }: { name: string }) {
   const ref = useRef<HTMLElement>(null)
 
@@ -122,40 +74,32 @@ export function BirdFooter({ name }: { name: string }) {
   return (
     <footer className="foot" ref={ref}>
       <div className="foot__sky" aria-hidden="true">
-        {FLOCK.map((b, i) => (
+        {FLOCK.map((b) => (
           <span
-            key={i}
-            className="bird"
+            key={b.key}
+            className={b.alt ? 'bird bird--alt' : 'bird'}
             style={
               {
                 '--top': `${b.top.toFixed(1)}%`,
                 '--size': `${b.size}px`,
-                '--dur': `${b.dur.toFixed(2)}s`,
+                '--dur': `${b.dur}s`,
                 '--delay': `${b.delay.toFixed(2)}s`,
+                '--amp': `${b.amp}px`,
+                '--bob': `${b.bob.toFixed(2)}s`,
                 '--flap': `${b.flap.toFixed(2)}s`,
-                '--o': b.o.toFixed(2),
+                '--o': b.o,
                 '--x': `${b.x.toFixed(1)}vw`,
+                '--ry': `${b.ry.toFixed(1)}px`,
               } as CSSProperties
             }
           >
-            <svg viewBox="0 0 40 16">
-              <path d={BIRD} />
-            </svg>
+            <span className="bird__bob">
+              <svg viewBox="0 0 40 16">
+                <path d={BIRD} />
+              </svg>
+            </span>
           </span>
         ))}
-      </div>
-      <div className="foot__horizon" aria-hidden="true">
-        <svg viewBox="0 0 1600 80" preserveAspectRatio="xMidYMax slice">
-          <path className="foot__trees foot__trees--far" d={FAR} />
-          <path className="foot__trees" d={NEAR} />
-          <g className="foot__trees foot__trees--lone">
-            <path d={LONE.trunk} />
-            {LONE.lumps.map((l, i) => (
-              <circle key={i} cx={l.cx.toFixed(1)} cy={l.cy.toFixed(1)} r={l.r.toFixed(1)} />
-            ))}
-          </g>
-        </svg>
-        <div className="foot__haze" />
       </div>
       <div className="foot__brand">
         <Link className="foot__name" href="/">

@@ -4,6 +4,8 @@ import { revalidateHooks } from '../hooks/revalidate'
 
 export const NEWS_KINDS = [
   { label: 'Media coverage', value: 'media' },
+  { label: 'Article', value: 'article' }, // something she wrote, published elsewhere
+  { label: 'Invited talk', value: 'talk' },
   { label: 'Interview', value: 'interview' },
   { label: 'Announcement', value: 'announcement' },
   { label: 'Award', value: 'award' },
